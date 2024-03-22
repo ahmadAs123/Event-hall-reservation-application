@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '../config';
+import { Icon } from 'react-native-elements'; 
+
 
 
 const Start = () => {
@@ -17,11 +19,27 @@ const Start = () => {
     <Text style = {{fontWeight:'bold',fontSize :33,marginTop:-10,  textAlign: 'center'}}>Welcome to Evento </Text>
       <Text style={styles.Text}>the best for you</Text>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.buttonText}>Sign in via Email</Text>
+        <Text style={styles.buttonText}>Sign in via Email</Text>   
       </TouchableOpacity>
+      <Icon
+            name="email" 
+            type="Fontisto"
+            size={28}
+            containerStyle={styles.iconContainer}
+            color="black"
+            
+            /> 
       <TouchableOpacity style={styles.button} onPress={signInWithGoogle}>
         <Text style={styles.buttonText}>Sign in via Gmail</Text>
       </TouchableOpacity>
+      <Icon
+            name="google" 
+            type="font-awesome"
+            size={28}
+            containerStyle={styles.iconContainer}
+            color="red"
+           
+            /> 
     </View>
     </View>
 
@@ -36,7 +54,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  
+  iconContainer:{
+    marginLeft:190,
+    top:-58
+    
+     
+ },
   boxcontainer: {
     width: 350,
     height: 350,
@@ -70,20 +93,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight:'bold',
     color: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-
+    marginLeft:50,
+    alignItems:'center',
+    justifyContent:"center"
   },
 
   button: {
     backgroundColor: '#00e4d0',
-    paddingVertical: 9,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 10,
     marginBottom: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-
+    marginLeft:10,
+    width:270,
+    height:40
   },
 });
 
