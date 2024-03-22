@@ -1,18 +1,15 @@
-import { View, Text , TouchableOpacity,TextInput,StyleSheet} from 'react-native'
-import React,{useState} from 'react'
+import { View, Text , TouchableOpacity,TextInput,StyleSheet,ActivityIndicator} from 'react-native'
+import React,{useState, useEffect} from 'react'
 import { useNavigation } from '@react-navigation/native'
 import {auth} from  '../config'
-import {
-  signInWithEmailAndPassword,
-  // createUserWithEmailAndPassword,
-  // signOut,
-  // getAuth,
-  // sendPasswordResetEmail,
-} from "firebase/auth";
+import {signInWithEmailAndPassword} from "firebase/auth";
+import { db } from '../config'; // Import your Firestore instance
+import { collection,query,where ,doc,getDocs} from 'firebase/firestore';
 
 const Login = () => {
   const navigation=useNavigation()
   const[email ,setEmail]= useState('')
+  const [loading, setLoading] = useState(false); 
   const[password ,setPassword]= useState('')
   const [error, setError] = useState('');
 
@@ -23,19 +20,60 @@ const Login = () => {
         setError("Please fill in all the fields!");
         return; 
       }
-      await signInWithEmailAndPassword(auth, email, password).then( () => {
-         alert("you are logged in")
-         navigation.navigate('HomePage');
+      setLoading(true); 
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    // Get the user document from Firestore
+    const userDocRef = collection(db, 'users');
+    // const userDocSnap = await getDoc(userDocRef);
+
+    // if (userDocSnap.exists()) {
+    //   const userData = userDocSnap.data();
+    //   // Check the type field to determine the user role
+    //   if (userData.type === 'Client') {
+    //     alert("You are logged in as a client");
+    //   } else if (userData.type === 'Admin') {
+    //     alert("You are logged in as an admin");
+    //   } else {
+    //     alert("Unknown user type");
+    //   }
+    // } 
+    // else {
+    //   alert("User document does not exist");
+    // }
+    const querySnapshot = await getDocs(query(userDocRef, where("email", "==", email)));
+
+    // Check if the user document exists
+    if (!querySnapshot.empty) {
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const userType = userData.type;
+        if(userData.type =='Admin')
+        navigation.navigate("AdminPage");
+        else 
+        navigation.navigate("HomePage");
 
       });
+    } else {
+      alert("User document does not exist");
+    }
 
-    } catch (error) {
-      alert(error.message);
-      console.log(email)
-      console.log(password)
+    }
+     catch (error) {
+      alert("The email or the password is incorrect ! ,please try agian");
+    }
+    finally {
+      setLoading(false); 
     }
   };
+
   
+  useEffect(() => {
+    return navigation.addListener('focus', () => {
+      setEmail('');
+      setPassword('');
+    });
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
     <View style={styles.boxcontainer}>
@@ -54,7 +92,11 @@ const Login = () => {
       
       <View style={{ alignItems: 'center' }}>
       <TouchableOpacity onPress={ ()=> loginpress(email ,password)} style={styles.buttons}>
-      <Text style={{fontWeight:'bold', fontSize:20, color: 'white'}}>Submit</Text>  
+      {loading ? (
+          <ActivityIndicator color="white" /> 
+        ) : (
+          <Text style={{fontWeight:'bold', fontSize:20, color: 'white'}}>Submit</Text>  
+          )}
       </TouchableOpacity>
       </View>
 
@@ -114,8 +156,6 @@ const styles =StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     },
-
-  
 
 
     buttons: {

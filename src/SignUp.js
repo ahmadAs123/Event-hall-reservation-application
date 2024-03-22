@@ -1,15 +1,13 @@
-import { View, Text , TouchableOpacity,TextInput,StyleSheet} from 'react-native'
+import { View, Text , TouchableOpacity,TextInput,StyleSheet,ActivityIndicator} from 'react-native'
+import { Picker } from '@react-native-picker/picker';
 import React,{useState} from 'react'
 import { useNavigation } from '@react-navigation/native'
 import {auth} from  '../config'
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../config"; // Assuming you have a db reference for Firestore
+import { db } from "../config"; 
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  // signOut,
-  // getAuth,
-  // sendPasswordResetEmail,
 } from "firebase/auth";
 import { Ionicons } from '@expo/vector-icons'; 
 
@@ -18,8 +16,10 @@ const SignUp = () => {
   const[email ,setEmail]= useState('')
   const[FirstName ,setFName]= useState('')
   const[LastName ,setLName]= useState('')
+  const [Type, setType] = useState('Client');
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); 
   const[phone ,setPhone]= useState('')
   const[password ,setPassword]= useState('')
 
@@ -33,19 +33,26 @@ const SignUp = () => {
     LastName,
     phone,
     email,
-    password) => {
+    password,
+    Type,
+    ) => {
     try {
       if (!FirstName || !LastName || !phone || !email || !password) {
         setError("Please fill in all the fields!");
         return; 
       }
-      await createUserWithEmailAndPassword(auth,email,password)
+      setLoading(true); 
+      const userCredential= await createUserWithEmailAndPassword(auth,email,password)
+      const user = userCredential.user;
+
       const usersCollectionRef = collection(db, "users"); // Get reference to the users collection
       await addDoc(usersCollectionRef, {
+        userId: user.uid,
         firstName: FirstName,
         lastName: LastName,
         phone: phone,
         email: email,
+        type: Type,
       });
      alert("you singup succefully!  ")
      navigation.navigate('Login');
@@ -53,6 +60,9 @@ const SignUp = () => {
 
     } catch (error) {
       alert(error.message);
+    }
+    finally {
+      setLoading(false); 
     }
   };
 
@@ -66,19 +76,40 @@ const SignUp = () => {
     <View style={{marginTop:40}}>
     <TextInput style ={styles.TextInput} placeholder='FirstName' onChangeText={(FirstName) => setFName(FirstName)} autoCapitalize='none' autoCorrect={false}/>
     <TextInput style ={styles.TextInput} placeholder='LastName' onChangeText={(LastName) => setLName(LastName)} autoCapitalize='none' autoCorrect={false}/>
-    <TextInput style ={styles.TextInput} placeholder='PhoneNumber' onChangeText={(phone) => setPhone(phone)} autoCapitalize='none' autoCorrect={false}  keyboardType='numeric' value={phone}/>
+    <TextInput style ={styles.TextInput} placeholder='PhoneNumber' onChangeText={(phone) => setPhone(phone)}    keyboardType='numeric' value={phone}/>
     <TextInput style ={styles.TextInput} placeholder='Email' onChangeText={(email) => setEmail(email)} autoCapitalize='none' autoCorrect={false}/>
     <TextInput style ={styles.TextInput} placeholder='Password' onChangeText={(password) => setPassword(password)} autoCapitalize='none' autoCorrect={false} secureTextEntry={!showPass} value={password}  />
     <TouchableOpacity onPress={PasswordVis} style={styles.eye}>
         <Ionicons name={showPass? 'eye-off' : 'eye'} size={24} color='black' />
       </TouchableOpacity>
+
+      <View style={styles.Box}>
+      <Text style={styles.title}>SignUp as :</Text>
+      <View style={styles.pickerContainer}>
+      <Picker
+        selectedValue={Type}
+        style={{ height: 35, width: '100%', marginBottom: 12 }}
+        onValueChange={(itemValue) =>{console.log('Selected Type:', itemValue); // Add this line to check the selected Type
+        setType(itemValue)
+    }
+       }>
+        <Picker.Item label="Admin" value="Admin" />
+        <Picker.Item label="Client" value="Client" />
+      </Picker>
+      </View>
+    </View>
     </View>
     {error ? <Text style={styles.ErrorMessage}>{error}</Text> : null}
-
+     
     <View style={{ alignItems: 'center' }}>
-    <TouchableOpacity onPress={ ()=> signuppress(FirstName,LastName,phone,email ,password)} style={styles.buttons}>
-    <Text style={{fontWeight:'bold', fontSize:20 , color:'white' }}>Submit</Text>  
+    <TouchableOpacity onPress={ ()=> signuppress(FirstName,LastName,phone,email ,password,Type)} style={styles.buttons}>
+    {loading ? (
+          <ActivityIndicator color="white" /> 
+        ) : (
+          <Text style={{fontWeight:'bold', fontSize:20, color: 'white'}}>Submit</Text>  
+          )}
     </TouchableOpacity>
+
     </View>
 
     <TouchableOpacity onPress={ ()=> navigation.navigate('Login')} style={{marginTop:20}}>
@@ -104,9 +135,23 @@ const styles =StyleSheet.create({
     top:30,
   },
 
+  Box: {
+    paddingHorizontal: 10,
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
   boxcontainer:{
     width: 350,
-    height: 600,
+    height: 670,
     justifyContent: 'center',
     paddingTop:40,
     paddingBottom:20,
@@ -146,7 +191,7 @@ const styles =StyleSheet.create({
 
   
     eye: {
-      top: '84%',
+      top: '68.5%',
       position: 'absolute',
       right: 1,
     },
