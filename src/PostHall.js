@@ -5,6 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import {auth} from  '../config'
+import { collection, addDoc,updateDoc ,doc,getDoc ,setDoc ,query,where, arrayUnion ,getDocs} from "firebase/firestore";
+import { db } from "../config"; 
 
 const PostHall = () => {
   const [hallName, setHallName] = useState('');
@@ -21,8 +24,8 @@ const PostHall = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
       multiple: true, 
+      aspect: [4, 3],
       quality: 1,
     });
 
@@ -32,14 +35,56 @@ const PostHall = () => {
   }
 
 
-  const DeleteImage = (i) => {
+  const DeleteImg = (i) => {
     setImage(prevImages => prevImages.filter((_, index) => index !== i));
   };
   
 
 
-  const handlePostHallDetails = () => {
+  const PostHall = async () => {
+    try {
+      // THE DATA OF THE POST THAT WILL PuBLISH
+      const P_Data = {
+        hallName,
+        place,
+        time,
+        capacity,
+        costPerHour,
+        selectedDay,
+        images: image,
+      };
+  // getting the uid of the user that logged in 
+      const currentUser = auth.currentUser;
+  
+      if (currentUser) { // find the user doc  that have the uid that logged in right now 
+        const q = query(collection(db, 'users'), where('userId', '==', currentUser.uid))
+        const docSnapS= await getDocs(q);  
+
+        const docRef = doc(db, 'users', docSnapS.docs[0].id); // getting the doc of the user
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) { // check if the doc existed 
+          await updateDoc(docRef, { ['posted halls']: arrayUnion(P_Data) }); // add the data post in the posted halls feild
+          console.log('New field added to user data successfully');
+        } else {
+          console.log('Document  wasnt found ');
+        }
+   
+      } 
+      else {
+        alert('there is no user is logging in right now '); 
+      }
+    }
+    
+    
+    catch (error) {
+      console.error('Error posting hall details: ', error);
+      alert('Failed to post hall details. Please try again.');
+    }
   };
+
+
+
 
   const select_date = (date) => {
     const Date = date.dateString;
@@ -57,7 +102,7 @@ const PostHall = () => {
     <Text style = {{fontWeight:'bold',fontSize :35 ,  textAlign: 'center'}}>Post Hall</Text>
     <View style={{marginTop:40}}></View>
 
-      <TextInput                                            // the feilds of the post hall  
+      <TextInput                                   // the feilds of the post hall  
         style={styles.TextInput}
         placeholder="Hall Name"
         value={hallName}
@@ -79,7 +124,6 @@ const PostHall = () => {
         placeholder="Time"
         value={time}
         onChangeText={text => setTime(text)}
-        keyboardType='numeric'
 
       />
 
@@ -124,21 +168,21 @@ const PostHall = () => {
       
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {image.map((uri, index) => (
-       <View key={index} style={{ position: 'relative', margin: 5 }}>
-        <Image source={{ uri }} style={{ width: 60, height: 60, borderRadius: 5 }} />
+       <View key={index} style={{ position: 'relative', margin: 4 }}>
+        <Image source={{ uri }} style={{ width: 60, height: 60 }} />
         <TouchableOpacity
 
         style={{ position: 'absolute', top: -4, right: -4 }}
-        onPress={() => DeleteImage(index)}
+        onPress={() => DeleteImg(index)}
       >
-        <FontAwesomeIcon icon={faTimesCircle} size={20} color="red" />
+        <FontAwesomeIcon icon={faTimesCircle} size={21} color="red" />
       </TouchableOpacity>
     </View>
   ))}
       </View>
 
       <View style={{ alignItems: 'center' }}> 
-      <TouchableOpacity onPress={handlePostHallDetails} style={styles.buttons}>
+      <TouchableOpacity onPress={PostHall} style={styles.buttons}>
         <Text style={styles.buttonText}>Post Hall</Text>
       </TouchableOpacity>
       </View>
