@@ -8,6 +8,9 @@ import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import {auth} from  '../config'
 import { collection, addDoc,updateDoc ,doc,getDoc ,setDoc ,query,where, arrayUnion ,getDocs} from "firebase/firestore";
 import { db } from "../config"; 
+import { getStorage, ref, uploadBytes ,getDownloadURL } from 'firebase/storage';
+
+const storage = getStorage();
 
 const PostHall = () => {
   const [hallName, setHallName] = useState('');
@@ -20,22 +23,36 @@ const PostHall = () => {
   const [selectedDay, setSelectedDay] = useState([]); // to store the availbale dates
   const [showCalendar, setShowCalendar] = useState(false); // State to control calendar modal visibility
 
-  const  pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      multiple: true, 
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(prevImages => [...prevImages, ...result.assets.map(asset => asset.uri)]);
+  const  pickImage = async () => { // pick image from the gallary phone
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        multiple: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.canceled) {
+        const ImageURLs = [];
+        for (const asset of result.assets) {
+          const response = await fetch(asset.uri);
+          const blob = await response.blob();
+          const filename = asset.uri.substring(asset.uri.lastIndexOf('/') + 1);
+          const storageRef = ref(storage, filename);
+          await uploadBytes(storageRef, blob);
+          const URL = await getDownloadURL(storageRef);
+          ImageURLs.push(URL);
+        }
+        setImage(prevImages => [...prevImages, ...ImageURLs]);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
     }
   }
 
 
-  const DeleteImg = (i) => {
+  const DeleteImg = (i) => { // deleting img from the stack 
     setImage(prevImages => prevImages.filter((_, index) => index !== i));
   };
   
@@ -65,7 +82,6 @@ const PostHall = () => {
 
         if (docSnap.exists()) { // check if the doc existed 
           await updateDoc(docRef, { ['posted halls']: arrayUnion(P_Data) }); // add the data post in the posted halls feild
-          console.log('New field added to user data successfully');
         } else {
           console.log('Document  wasnt found ');
         }
