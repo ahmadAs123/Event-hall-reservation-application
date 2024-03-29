@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Alert, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native'
 import IoniconsIcon from 'react-native-vector-icons/Ionicons'; 
 import { SearchBar, Icon } from 'react-native-elements';
 
@@ -7,9 +8,10 @@ import { SearchBar, Icon } from 'react-native-elements';
   const SearchField = () => {
     const [focused, setFocused] = useState(false);
     const [search, setSearch] = useState('');
-  
+    const navigation=useNavigation()
+
     const SearchFunction = () => {
-        Alert.alert('Search Result', `Search keyword: ${search}`);
+      navigation.navigate('OptionsPage');
     };
   
     return (

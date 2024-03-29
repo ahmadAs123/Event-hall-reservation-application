@@ -18,6 +18,7 @@ import AdminHalls from "./src/AdminPages/AdminHalls";
 import AdminProfile from "./src/AdminPages/AdminProfile";
 import Adminsetting from "./src/AdminPages/Adminsetting";
 import AdminChat from "./src/AdminPages/AdminChat";
+import OptionsPage from "./src/OptionsPage";
 import 'react-native-gesture-handler';
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
@@ -128,6 +129,23 @@ function App() {
           }}
         />
 
+<Stack.Screen
+          name="OptionsPage"  
+          component={OptionsPage}
+          options={({ navigation }) => ({
+            headerTitle: () => <Header name="OptionsPage" />,
+            headerStyle: {
+              height: 150,
+              backgroundColor: '#00e4d0',
+             
+            },
+            headerLeft: () =>(
+              <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
+              <Icon name="arrow-back" size={30}/>
+              </TouchableOpacity>
+            )
+          })}
+        />
         <Stack.Screen
           name="Login"
           component={Login}
