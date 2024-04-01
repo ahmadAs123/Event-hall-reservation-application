@@ -17,13 +17,13 @@ const HomePageComponent = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false); 
 
-  const Logout = async (navigation, setLoading) => {     // function to logout 
+  const Logout = async () => {     // function to logout 
     try {
-      setLoading(true)
       await auth.signOut();
+      setLoading(true)
       navigation.navigate('StartPage');
     } catch (error) {
-      alert('Error  in logging out');
+      alert(error);
     }
     finally {
       setLoading(false); // return false state 
@@ -125,6 +125,7 @@ const styles = {
   NavBar: {
    marginTop:259    
   },
+  
   TopContainer: {
     width: 400,
     marginTop:5,
