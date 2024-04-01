@@ -3,15 +3,18 @@ import { StyleSheet, Alert, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import IoniconsIcon from 'react-native-vector-icons/Ionicons'; 
 import { SearchBar, Icon } from 'react-native-elements';
-
+import LoadingPage from './LoadingPage';
 
   const SearchField = () => {
     const [focused, setFocused] = useState(false);
     const [search, setSearch] = useState('');
     const navigation=useNavigation()
+    const [loading, setLoading] = useState(false); 
 
-    const SearchFunction = () => {
-      navigation.navigate('OptionsPage');
+
+    const SearchFunction = async () => {
+      
+      navigation.navigate('OptionsPage', {search});
     };
   
     return (
