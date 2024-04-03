@@ -59,30 +59,43 @@ const HomePage = () => {
  
 
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+    screenOptions={{
+      tabBarStyle:{
+        backgroundColor:"#00e4d0",
+        height:57,
+      },
+      tabBarLabelStyle: {
+        color: "white" , 
+        fontSize: 13, 
+        fontWeight:"bold"
+      }
+
+    }}
+    >
 
 <Tab.Screen
           name="HomePage"
           component={HomePageComponent}
           options={{
-            tabBarIcon: ({ color}) => (
-              <Icon name="home" type="AntDesign" color={color} size={30} />
+            tabBarIcon: () => (
+              <Icon name="home" type="AntDesign" color={"white"} size={27} />
             ),
             headerShown: false,
           }}
         />
 
-
-<Tab.Screen
-      name="Profile"
-      component={ClientProfile}
+    <Tab.Screen
+      name="MyReservations"
+      component={ClientReservations}
       options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="account-circle" type="MaterialIcons" color={color} size={30} />
-        ),
+        tabBarIcon: () => (
+      <Entypo name="briefcase" color={"white"} size={23} />       
+       ),
         headerShown: false,
       }}
     />
+
 
 
 
@@ -90,23 +103,24 @@ const HomePage = () => {
       name="Chat"
       component={ClientChat}
       options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="chat" color={color} size={30} />
+        tabBarIcon: () => (
+          <Icon name="chat" color={"white"} size={23} />
         ),
         headerShown: false,
       }}
     />
 
-
-        <Tab.Screen
-      name="MyReservations"
-      component={ClientReservations}
+<Tab.Screen
+      name="Profile"
+      component={ClientProfile}
       options={{
-        tabBarIcon: ({ color }) => (
-      <Entypo name="briefcase" color={color} size={30} />        ),
+        tabBarIcon: () => (
+          <Icon name="account-circle" type="MaterialIcons" color={"white"} size={26} />
+        ),
         headerShown: false,
       }}
     />
+    
         
     </Tab.Navigator>
 

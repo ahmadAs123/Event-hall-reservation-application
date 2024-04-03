@@ -10,25 +10,40 @@ const Tab = createBottomTabNavigator();
 function ButtomNavBar({ searchValue }) {
 
     return (
-      <Tab.Navigator >
+      <Tab.Navigator
+      screenOptions={{
+        tabBarStyle:{
+          backgroundColor:"#00e4d0",
+          height:57,
+        },
+        tabBarLabelStyle: {
+          color: "white" , 
+          fontSize: 13, 
+          fontWeight:"bold"
+        }
+
+      }}
+       >
        
         <Tab.Screen
           name="List"
           initialParams={{searchValue}} 
           component={ListHalls}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="list" type="feather" color={color} size={size} />
+            tabBarIcon: () => (
+              <Icon name="list" type="feather" color={"white"} size={23} />
             ),
+            headerShown: false, 
           }}
         />
          <Tab.Screen
           name="Map"
           component={MapHalls}
           options={{
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="map" type="feather" color={color} size={size} />
+            tabBarIcon: () => (
+              <Icon name="map" type="feather" color={"white"} size={23} />
             ),
+            headerShown: false, 
           }}
         />
       </Tab.Navigator>
