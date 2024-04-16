@@ -18,8 +18,9 @@ import AdminHalls from "./src/AdminPages/AdminHalls";
 import AdminProfile from "./src/AdminPages/AdminProfile";
 import Adminsetting from "./src/AdminPages/Adminsetting";
 import AdminChat from "./src/AdminPages/AdminChat";
-import OptionsPage from "./src/OptionsPage";
+import OptionsPage from './src/OptionsPage';
 import 'react-native-gesture-handler';
+import SelectedHall from "./src/SelectedHall";
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -86,6 +87,25 @@ function App() {
         />
 
 <Stack.Screen
+          name="SelectedHall"  
+          component={SelectedHall}
+          options={{
+            headerTitle: () => <Header name="SelectedHall" />,
+            headerStyle: {
+              height: 120,
+              backgroundColor: '#00e4d0',
+              
+            },
+            headerLeft: () =>(
+              <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
+              <Icon name="arrow-back" size={30}/>
+              </TouchableOpacity>
+            )
+          }}
+          
+        />
+
+<Stack.Screen
           name="AdminChat"  
           component={AdminChat}
           options={{
@@ -99,35 +119,17 @@ function App() {
           }}
         />
 
-
+{/* 
 <Stack.Screen
           name="MapHalls"  
           component={MapHalls}
-          options={{
-            headerTitle: () => <Header name="MapHalls" />,
-            headerStyle: {
-              height: 150,
-              backgroundColor: '#00e4d0',
-              
-            },
-            headerLeft: () => null,
-          }}
         />
 
 
 <Stack.Screen
           name="ListHalls"  
           component={ListHalls}
-          options={{
-            headerTitle: () => <Header name="ListHalls" />,
-            headerStyle: {
-              height: 150,
-              backgroundColor: '#00e4d0',
-              
-            },
-            headerLeft: () => null,
-          }}
-        />
+        /> */}
 
 <Stack.Screen
           name="OptionsPage"  
@@ -135,7 +137,7 @@ function App() {
           options={({ navigation }) => ({
             headerTitle: () => <Header name="OptionsPage" />,
             headerStyle: {
-              height: 150,
+              height: 120,
               backgroundColor: '#00e4d0',
              
             },
@@ -219,11 +221,7 @@ function App() {
                 shadowColor: '#000',
               },
               headerLeft: () => null,
-              headerRight: () => (
-                <TouchableOpacity onPress={logout} style={{ top: 8, right: 10 }} >
-                  <Icon name="logout" type="AntDesign" color="white" size={35} />
-                </TouchableOpacity>
-              ),
+            
             })}
             
           />
