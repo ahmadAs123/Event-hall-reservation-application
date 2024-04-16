@@ -2,13 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList,ScrollView ,StyleSheet, TouchableOpacity } from 'react-native';
 import { collection, getDocs, query, where } from "firebase/firestore";
 import StarRating from 'react-native-star-rating'; // Import the star rating component
+import { useNavigation } from '@react-navigation/native'
 import {db} from "../config"; // Import Firestore instance
 import LoadingPage from '../component/LoadingPage';
 
 const ListItem = ({ item }) => {
+
+  const navigation=useNavigation()
+  const pressbutt = ( ) => {
+    navigation.navigate("SelectedHall");
+  }
   return (   // creating container 
     <View style={styles.Container}>   
-    <TouchableOpacity onPress={null}>
+    <TouchableOpacity onPress={pressbutt}>
       <View style={styles.Post}> 
        <Image source={{ uri: item.image }} style={styles.img} />
         <View style={styles.text}>
@@ -27,6 +33,7 @@ const ListItem = ({ item }) => {
     </View>
   );
 };
+
 
 const ListHalls = ({ route }) => {
   const [hallsData, setHallsData] = useState([]);
