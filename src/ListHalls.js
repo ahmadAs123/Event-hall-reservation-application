@@ -10,8 +10,9 @@ const ListItem = ({ item }) => {
 
   const navigation=useNavigation()
   const pressbutt = ( ) => {
-    navigation.navigate("SelectedHall");
+    navigation.navigate("SelectedHall" , item.name);
   }
+
   return (   // creating container 
     <View style={styles.Container}>   
     <TouchableOpacity onPress={pressbutt}>
@@ -102,11 +103,15 @@ const ListHalls = ({ route }) => {
           ))}
         </View>
       </ScrollView>
+      {hallsData.length === 0 ? (
+      <Text style={styles.Empty_HallsText}>There are no halls in this area !</Text>
+       ) : (
       <FlatList 
         data={hallsData}
         renderItem={({ item }) => <ListItem item={item} />}
         keyExtractor={item => item.id}
       />
+    )}
     </View>
 
   );
@@ -116,7 +121,15 @@ const styles = StyleSheet.create({
   Container: {
     
   },
+  Empty_HallsText: {
+    justifyContent: 'center',
+    flex: 1,
+    textAlign: 'center',
+    marginBottom:50,
+    alignItems: 'center',
+    fontSize: 18,
 
+  },
   Post: {
     paddingHorizontal: 10,
     flex:1,
