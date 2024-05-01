@@ -89,19 +89,19 @@ function App() {
 <Stack.Screen
           name="SelectedHall"  
           component={SelectedHall}
-          options={{
-            headerTitle: () => <Header name="SelectedHall" />,
+          options={({ navigation }) => ({
+            headerTitle: () => <Header name="OptionsPage" />,
             headerStyle: {
               height: 120,
               backgroundColor: '#00e4d0',
-              
+             
             },
-            headerLeft: () =>(
-              <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
-              <Icon name="arrow-back" size={30}/>
-              </TouchableOpacity>
-            )
-          }}
+            // headerLeft: () =>(
+            //   <TouchableOpacity onPress={() => navigation.navigate('OptionsPage')}>
+            //   <Icon name="arrow-back" size={30}/>
+            //   </TouchableOpacity>
+            // )
+          })}
           
         />
 
