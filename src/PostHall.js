@@ -14,6 +14,7 @@ const storage = getStorage();
 
 const PostHall = () => {
   const [hallName, setHallName] = useState('');
+  const [type, setType] = useState('');
   const [place, setPlace] = useState('');
   const [time, setTime] = useState('');
   const [image, setImage] = useState([]);
@@ -69,6 +70,7 @@ const PostHall = () => {
         costPerHour,
         selectedDay,
         images: image,
+        type
       };
   // getting the uid of the user that logged in 
       const currentUser = auth.currentUser;
