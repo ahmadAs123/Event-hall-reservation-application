@@ -34,7 +34,7 @@ import LoadingPage from './LoadingPage';
           <Icon
             name="search"
             type="Feather"
-            size={28}
+            size={30}
             containerStyle={styles.iconContainer}
             color="black"
             onPress={SearchFunction} 
@@ -45,7 +45,7 @@ import LoadingPage from './LoadingPage';
           <IoniconsIcon
             name="filter-circle-outline"
             size={30}
-            color="black"
+            color="#f0fff0"
             style={styles.Filltericon}
             onPress={() => {
               console.log('Filter icon pressed');
@@ -58,8 +58,10 @@ import LoadingPage from './LoadingPage';
   
   const styles = StyleSheet.create({
     container: {
-      paddingHorizontal: 10,
-      bottom: 4,
+      bottom: 11,
+      backgroundColor:"#00e4d4",
+      height:69,
+      
     },
     inputText: {
       color: 'black',
@@ -67,8 +69,8 @@ import LoadingPage from './LoadingPage';
   
     iconContainer: {
       right: 10,
-      top: -47,
-      marginLeft: 352,
+      top: -36,
+      marginLeft: 363,
       width: 30,
       height: 30,
     },
@@ -80,18 +82,22 @@ import LoadingPage from './LoadingPage';
     },
   
     Filltericon: {
-      marginLeft: 342,
-      top: -49,
+      marginLeft: 352,
+      top: -39,
+      left:4
     },
   
     input: {
-      width: 330,
-      height: 45,
-      borderRadius: 23,
+      width: 340,
+      height: 42,
+      borderRadius: 20,
       borderWidth: 2,
       backgroundColor: 'white',
       borderBottomWidth: 2,
-      borderColor: 'gray',
+      borderColor: 'white',
+      top:7,
+      left:3
+
     },
   });
   
