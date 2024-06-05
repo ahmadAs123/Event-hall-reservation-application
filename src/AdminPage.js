@@ -110,7 +110,7 @@ const AdminPage = () => {
       component={Adminsetting}
       options={{
         tabBarIcon: ({ color}) => (
-          <Icon name="list" type="feather" color={color} size={30} />
+          <Icon name="settings" type="feather" color={color} size={29} />
         ),
         headerShown: false,
       }}
