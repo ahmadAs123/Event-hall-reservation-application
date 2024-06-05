@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList,ScrollView ,StyleSheet, TouchableOpacity } from 'react-native';
 import { collection, getDocs, query, where } from "firebase/firestore";
-import StarRating from 'react-native-star-rating'; // Import the star rating component
+// import StarRating from 'react-native-star-rating'; // Import the star rating component
 import { useNavigation } from '@react-navigation/native'
 import {db} from "../config"; // Import Firestore instance
 import LoadingPage from '../component/LoadingPage';
@@ -23,11 +23,11 @@ const ListItem = ({ item }) => {
           <Text style={styles.loc}>{item.location}</Text>
         </View>
         <View style={styles.stars}>
-          <StarRating
+          {/* <StarRating
             starSize={20}
             maxStars={5}
             emptyStarColor="gold"
-          />
+          /> */}
           </View>
       </View>
     </TouchableOpacity>
@@ -91,7 +91,7 @@ const ListHalls = ({ route }) => {
   return (
 
    
-     <View style={{ flex: 1 }}>
+     <View style={{ flex: 0 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.countryRow}>
           {countries.map((place, index) => (
@@ -106,10 +106,13 @@ const ListHalls = ({ route }) => {
       {hallsData.length === 0 ? (
       <Text style={styles.Empty_HallsText}>There are no halls in this area !</Text>
        ) : (
+      
       <FlatList 
         data={hallsData}
         renderItem={({ item }) => <ListItem item={item} />}
         keyExtractor={item => item.id}
+        contentContainerStyle={styles.flatListContent}
+
       />
     )}
     </View>
@@ -119,8 +122,14 @@ const ListHalls = ({ route }) => {
 
 const styles = StyleSheet.create({
   Container: {
-    
+    flex: 1,
+
   },
+  flatListContent: {
+    flexGrow :1,
+    paddingBottom: 50
+  },
+  
   Empty_HallsText: {
     justifyContent: 'center',
     flex: 1,
@@ -143,17 +152,12 @@ const styles = StyleSheet.create({
     backgroundColor:"white"
   },
 
-  stars: {
-    top:30,
-    right:152,
-
-  },
-
+ 
   countryRow: {
     flexDirection: 'row',
    justifyContent: 'space-around',
    backgroundColor: 'white',
-   height:55,
+   height:50,
    paddingTop:8
  },
 
