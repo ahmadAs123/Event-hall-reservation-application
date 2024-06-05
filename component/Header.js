@@ -12,12 +12,12 @@ const Header = () => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    marginLeft: 15,
+    marginLeft: 8,
   },
   logo: {
     width: 85, 
-    height: 85,
-    marginRight: 10,
+    height: 55,
+    top:-7
   },
 });
 
