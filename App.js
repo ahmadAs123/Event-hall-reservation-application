@@ -19,8 +19,11 @@ import AdminProfile from "./src/AdminPages/AdminProfile";
 import Adminsetting from "./src/AdminPages/Adminsetting";
 import AdminChat from "./src/AdminPages/AdminChat";
 import OptionsPage from './src/OptionsPage';
+import ClientChat from './src/ClientPages/ClientChat'
+import ChatPage from "./src/ChatPage";
 import 'react-native-gesture-handler';
 import SelectedHall from "./src/SelectedHall";
+import ClientReservations from "./src/ClientPages/ClientReservations";
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -119,17 +122,19 @@ function App() {
           }}
         />
 
-{/* 
+
 <Stack.Screen
-          name="MapHalls"  
-          component={MapHalls}
+          name="ChatPage"  
+          component={ChatPage}
+          options={{
+            headerStyle: {
+              height: 120,
+              backgroundColor: '#00e4d0',
+              
+            },
+          }}
         />
 
-
-<Stack.Screen
-          name="ListHalls"  
-          component={ListHalls}
-        /> */}
 
 <Stack.Screen
           name="OptionsPage"  
@@ -148,6 +153,7 @@ function App() {
             )
           })}
         />
+        
         <Stack.Screen
           name="Login"
           component={Login}
@@ -166,11 +172,6 @@ function App() {
           })}
         />
 
-
-        
-
-
-          
 
         <Stack.Screen
           name="SignUp"
@@ -216,7 +217,7 @@ function App() {
             options={({ navigation ,route}) => ({
               headerTitle: () => <Header name="HomePage" />,
               headerStyle: {
-                height: 150,
+                height: 100,
                 backgroundColor: '#00e4d0',
                 shadowColor: '#000',
               },
@@ -232,7 +233,7 @@ function App() {
           options={({ navigation }) => ({
             headerTitle: () => <Header name="ForrgotPassword" />,
             headerStyle: {
-              height: 150,
+              height: 120,
               backgroundColor: '#00e4d0',
              
             },
@@ -297,6 +298,8 @@ function App() {
             )
           })}
         />
+
+
          
       </Stack.Navigator>
       
