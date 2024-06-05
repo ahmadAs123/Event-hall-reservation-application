@@ -19,7 +19,10 @@ const HomePageComponent = () => {
   const [choosenType, setChoosenType] = useState("All Categories");
   const [fetchedhalls, setFetchedHalls] = useState([]);
 
-  
+  useEffect(() => {
+    fetchHalls("All Categories");
+  }, []);
+
   const fetchHalls = async (type) => {
     setLoading(true);
     try {
@@ -74,11 +77,18 @@ const HomePageComponent = () => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.countryRow}>
           {types.map((type, index) => (
-            <TouchableOpacity key={index} onPress={() => SelectType(type)}>
-              <View style={styles.countryButton}>
-                <Text style={styles.place}>{type}</Text>
-              </View>
-            </TouchableOpacity>
+            <TouchableOpacity
+            key={index}
+            onPress={() => SelectType(type)}
+            style={[
+              styles.countryButton,
+              choosenType === type && { backgroundColor: '#00e4d0' } 
+            ]}
+          >
+            <Text style={[styles.place, choosenType === type && { color: 'white' }]}>
+              {type}
+            </Text>
+          </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -203,10 +213,11 @@ const styles = {
     borderWidth: 2,
     borderColor: 'white',
     paddingHorizontal: 11,
-    paddingVertical: 6,
+    paddingVertical: 9,
     paddingRight: 7,
     backgroundColor: '#f5f5f5', 
     marginRight: 4, 
+    height:42
   },
   flatListContent: {
     flexGrow :1,
@@ -226,7 +237,7 @@ const styles = {
     justifyContent: 'space-around',
     backgroundColor: 'white',
     height: 50,
-    paddingTop: 4,
+    paddingTop: 1,
   },
   hallItem: {
     padding: 10,
