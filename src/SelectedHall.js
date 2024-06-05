@@ -64,7 +64,7 @@ const SelectedHall = ({ navigation }) => {
     setAvailableShifts(shifts);
   };
 
-  const Reservation = async () => { //func when the reserve button pressed
+  const Reservation = async (hall) => { //func when the reserve button pressed
     console.log("Reservation button pressed");
     console.log("Selected Date:", selectedDate);
     console.log("Selected Shift:", selectedShift.start, '-', selectedShift.end);
@@ -80,6 +80,7 @@ const SelectedHall = ({ navigation }) => {
         location: hallsData.find(hall => hall.name === HallName).location,
         date: selectedDate,
         userId: uid,
+        images: hall.images 
       };
 
       try {
@@ -176,7 +177,7 @@ const SelectedHall = ({ navigation }) => {
 
           <View style={styles.buttCont}>
             <View style={styles.button}>
-              <TouchableOpacity onPress={Reservation} disabled={resReq}>
+              <TouchableOpacity  onPress={() => Reservation(hall)} disabled={resReq}>
                 <Text style={{ fontWeight: 'bold', color: 'white' ,fontSize: 20}}>
                   {resReq ? 'Request sent' : 'Reserve'}
                 </Text>
