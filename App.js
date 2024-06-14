@@ -24,6 +24,8 @@ import ChatPage from "./src/ChatPage";
 import 'react-native-gesture-handler';
 import SelectedHall from "./src/SelectedHall";
 import ClientReservations from "./src/ClientPages/ClientReservations";
+import EditProfile from "./src/ClientPages/EditProfile";
+import ClientProfile from "./src/ClientPages/ClientProfile";
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -74,6 +76,20 @@ function App() {
         }}
         />
  
+ <Stack.Screen
+          name="EditProfile"  
+          component={EditProfile}
+          options={{
+            headerTitle: () => <Header name="EditProfile" />,
+            headerStyle: {
+              height: 150,
+              backgroundColor: '#00e4d0',
+              
+            },
+          }}
+          
+        />
+
 <Stack.Screen
           name="AdminPage"  
           component={AdminPage}
@@ -210,7 +226,7 @@ function App() {
           })}
         />
          
-        
+
 <Stack.Screen
             name="HomePage"
             component={HomePage}
