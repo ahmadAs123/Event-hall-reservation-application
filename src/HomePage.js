@@ -1,10 +1,10 @@
-import { View, Text,Image, TouchableOpacity, ActivityIndicator, ScrollView, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { auth, db } from '../config'; 
-import SearchFeild from '../component/SearchFeild';
 import React, { useState, useEffect } from "react";
-import { Icon } from 'react-native-elements';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView, FlatList,StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query } from 'firebase/firestore'; 
+import { db } from '../config';
+import SearchFeild from '../component/SearchFeild';
+import { Icon } from 'react-native-elements';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ClientProfile from './ClientPages/ClientProfile';
 import ClientReservations from './ClientPages/ClientReservations';
@@ -18,6 +18,11 @@ const HomePageComponent = () => {
   const [loading, setLoading] = useState(false);
   const [choosenType, setChoosenType] = useState("All Categories");
   const [fetchedhalls, setFetchedHalls] = useState([]);
+
+  const pressbutt = (item) => {
+    navigation.navigate("SelectedHall",  item.name );
+
+  };
 
   useEffect(() => {
     fetchHalls("All Categories");
@@ -46,7 +51,6 @@ const HomePageComponent = () => {
       setFetchedHalls(hallsData);
     } catch (err) {
       console.error('Error while fetching data:', err);
-
     } finally {
       setLoading(false);
     }
@@ -71,47 +75,47 @@ const HomePageComponent = () => {
 
   return (
     <View style={{ flex: 0 }}>
-    <View style={styles.TopContainer}>
+      <View style={styles.TopContainer}>
         <SearchFeild />
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.countryRow}>
           {types.map((type, index) => (
             <TouchableOpacity
-            key={index}
-            onPress={() => SelectType(type)}
-            style={[
-              styles.countryButton,
-              choosenType === type && { backgroundColor: '#00e4d0' } 
-            ]}
-          >
-            <Text style={[styles.place, choosenType === type && { color: 'white' }]}>
-              {type}
-            </Text>
-          </TouchableOpacity>
+              key={index}
+              onPress={() => SelectType(type)}
+              style={[
+                styles.countryButton,
+                choosenType === type && { backgroundColor: '#00e4d0' }
+              ]}
+            >
+              <Text style={[styles.place, choosenType === type && { color: 'white' }]}>
+                {type}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
       {loading ? (
-         <View style={styles.loadCont}>
-        <ActivityIndicator size="large" color="#00e4d0" />
+        <View style={styles.loadCont}>
+          <ActivityIndicator size="large" color="#00e4d0" />
         </View>
       ) : (
         <FlatList
           data={fetchedhalls}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-        <View style={styles.Container}>   
-              <TouchableOpacity onPress={null}>
-              <View style={styles.Post}> 
-                <Image source={{ uri: item.image }} style={styles.img} />
+            <View style={styles.Container}>
+              <TouchableOpacity onPress={() => pressbutt(item)}>
+                <View style={styles.Post}>
+                  <Image source={{ uri: item.image }} style={styles.img} />
                   <View style={styles.text}>
                     <Text style={styles.name}>{item.name}</Text>
                     <Text style={styles.loc}>{item.location}</Text>
                   </View>
-              </View>
+                </View>
               </TouchableOpacity>
-        </View>
+            </View>
           )}
           contentContainerStyle={styles.flatListContent}
           ListEmptyComponent={<Text style={styles.noHallsText}>No halls available</Text>}
@@ -185,7 +189,7 @@ const HomePage = () => {
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   logoutButton: {
     marginTop: 250,
     paddingVertical: 10,
@@ -297,6 +301,6 @@ const styles = {
       fontWeight: 'bold',
       fontSize: 17,
     },
-};
+});
 
 export default HomePage;
