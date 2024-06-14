@@ -33,6 +33,7 @@
     "react-native-calendars": "^1.1304.1",
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "~2.14.0",
+    "react-native-gifted-chat": "^2.4.0",
     "react-native-image-picker": "^7.1.2",
     "react-native-maps": "^1.10.0",
     "react-native-paper": "^5.12.3",
@@ -41,7 +42,8 @@
     "react-native-screens": "~3.29.0",
     "react-native-star-rating": "^1.1.0",
     "react-native-web": "~0.19.6",
-    "recyclerlistview": "^4.2.0"
+    "recyclerlistview": "^4.2.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
