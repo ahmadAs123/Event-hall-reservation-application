@@ -43,7 +43,7 @@ export default function EditProfile({ route, navigation }) {
         <Text style={styles.lbl}>First Name</Text>
         <TextInput
           style={styles.txt}
-          value={fname}
+          value={fnameS}
           onChangeText={setFNameS}
         />
       </View>
