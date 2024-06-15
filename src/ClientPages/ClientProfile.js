@@ -20,6 +20,8 @@ const ClientProfile = () => {
   const [location, setLocation] = useState('');
   const [id, setId] = useState('');
 
+
+  
   
   // Fetching the data 
   
@@ -41,9 +43,8 @@ const ClientProfile = () => {
             setPhone(Data.phone);
             setId(Data.userId)
             if (Data.imageURL) {
-            setImage([Data.imageURL]); 
+              setImage(Data.imageURL); // Set image 
             }
-
           } 
         } catch (error) {
           console.error('Failed while fetching the  data:', error);
@@ -102,12 +103,15 @@ const ClientProfile = () => {
     }
   };
 
-  const Logout = () => { //func to logout
-    auth.signOut().then(() => {
-      alert('Logged out successfully');
-    });
-  };
+  const Logout = async () => {
+    try {
+      await auth.signOut();
+      navigation.navigate('StartPage');
+    } catch (error) {
+      alert(error);
 
+    } 
+  };
   return (
     <View style={styles.container}>
       <View style={styles.cont}>
