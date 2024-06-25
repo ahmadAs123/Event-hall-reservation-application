@@ -7,7 +7,7 @@ import React,{useState} from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AdminHalls from './AdminPages/AdminHalls';
 import AdminProfile from './AdminPages/AdminProfile';
-import Adminsetting from './AdminPages/Adminsetting';
+import AdminChat from './AdminPages/AdminChat';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome5';
 
 
@@ -106,8 +106,8 @@ const AdminPage = () => {
 
 
     <Tab.Screen
-      name="Setting"
-      component={Adminsetting}
+      name="Chat"
+      component={AdminChat}
       options={{
         tabBarIcon: ({ color}) => (
           <Icon name="settings" type="feather" color={color} size={29} />
