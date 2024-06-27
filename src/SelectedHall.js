@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput} from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { db } from "../config";  
 import { Picker } from '@react-native-picker/picker'; 
 import { collection, getDocs, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth"; 
 import { FontAwesome } from '@expo/vector-icons'; // 
-import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore"; 
+import { doc, getDoc, updateDoc, setDoc ,query,where} from "firebase/firestore"; 
+import { onSnapshot } from "firebase/firestore";
 
 
 const { width: Width, height: Height } = Dimensions.get('window');
@@ -20,8 +21,10 @@ const SelectedHall = ({ navigation }) => {
   const [resReq, setResReq] = useState(false);
   const [rating, setRating] = useState(0);
   const [activeTab, setActiveTab] = useState('Information');
- 
-
+  const [status, setStatus] = useState('pending');
+  const [comment, setComment] = useState('');
+  const [fname, setFname] = useState('');
+  const [shiftsStatus, setShiftsStatus] = useState({});
   const route = useRoute();
   const HallName  = route.params;
   const scrollViewRef = useRef(null);
@@ -62,16 +65,58 @@ const SelectedHall = ({ navigation }) => {
     fetchData();
   }, [HallName]);
 
-  const ImgContHeight = Height * 0.3;
+  const ImgContHeight = Height * 0.25;
 
-  const DateChange = (date) => {// func when i try to change the selected date from list 
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+  
+    if (!user) {  // Clearing the  shifts  if there is no user authenticated to programm
+      setShiftsStatus({}); 
+      return;
+    }
+    const uid = user.uid;
+    const q = query(
+      collection(db, "reservations"),
+      where("hallName", "==", HallName),
+      where("userId", "==", uid)
+    );
+    const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
+      const newShiftsStatus = {};
+      querySnapshot.forEach((doc) => {
+        const reservationData = doc.data();
+        const shiftKey = `${reservationData.date}-${reservationData.shift}`;
+        newShiftsStatus[shiftKey] = reservationData.status;
+      });
+      setShiftsStatus(newShiftsStatus);
+    }, (error) => {
+      console.error('Error fetching reservations:', error);
+    });
+  
+    return () => {//cleanup function
+      unsubscribeSnapshot(); 
+    };
+  }, [HallName]);
+  
+
+  const DateChange = (date) => { // function for changing the selected  date from the list
     setSelectedDate(date);
-    const selectedHall = hallsData.find(hall => hall.name === HallName); // search about the date in the data to get the shifts of its date
-    const shifts = selectedHall.availableDates[date];
-    setAvailableShifts(shifts);
+    const selectedHall = hallsData.find(hall => hall.name === HallName);
+    const shifts = selectedHall.availableDates[date] || [];
+  
+    // Filter all the accepted shifts from the database collection 
+    const filteredShifts = shifts
+      .map(shift => {
+        const shiftKey = `${date}-${shift.start} - ${shift.end}`;
+        const status = shiftsStatus[shiftKey];
+        return { ...shift, status, label: `${shift.start} - ${shift.end}${status === 'pending' ? ' (pending)' : ''}` };
+      })
+      .filter(shift => shift.status !== 'accepted'); // Remove accepted shifts
+    setAvailableShifts(filteredShifts);
   };
-
-  const Reservation = async (hall) => { //func when the reserve button pressed
+  
+  
+  const Reservation = async (hall) => {
     console.log("Reservation button pressed");
     console.log("Selected Date:", selectedDate);
     console.log("Selected Shift:", selectedShift.start, '-', selectedShift.end);
@@ -81,23 +126,42 @@ const SelectedHall = ({ navigation }) => {
 
     if (user) {
       const uid = user.uid;
-      const resData = {
-        hallName: HallName,
-        shift: `${selectedShift.start} - ${selectedShift.end}`,
-        location: hallsData.find(hall => hall.name === HallName).location,
-        date: selectedDate,
-        userId: uid,
-        images: hall.images
-      };
-
       try {
-        await addDoc(collection(db, "reservations"), resData);
-        console.log("Reservation data added to Firestore");
-        setResReq(true);
-      } catch (error) {
-        console.error("Error adding reservation data to Firestore:", error);
+        let firstName = '';
+        let lastName = '';
+        const q = query(collection(db, "users"), where("userId", "==", uid));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data();
+          firstName = userData.firstName;
+          lastName = userData.lastName;
+        });
+          const fullName = `${firstName} ${lastName}`;
+          setFname(fullName)
+          const resData = {
+            hallName: HallName,
+            shift: `${selectedShift.start} - ${selectedShift.end}`,
+            location: hallsData.find((hall) => hall.name === HallName).location,
+            date: selectedDate,
+            userId: uid,
+            images: hall.images,
+            Name: fullName,
+            status: status,
+          };
+
+          try{
+            await addDoc(collection(db, "reservations"), resData);
+            console.log("Reservation data added to Firestore");
+            setResReq(true);
+          } 
+          catch (error) {
+            console.error("Error adding reservation data to Firestore:", error);
+          }} 
+        catch (error) {
+        console.error("Error while fetching user data:", error);
       }
     }
+    setSelectedShift('');
   };
 
 
@@ -105,8 +169,7 @@ const SelectedHall = ({ navigation }) => {
 const Rating = ({ rating, setRating }) => {
   return (
     <View>
-
-    <View style={{ marginVertical: 11, flexDirection: 'row', justifyContent: 'center' }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       {[1, 2, 3, 4, 5].map((star) => (
         <TouchableOpacity
           key={star}
@@ -121,6 +184,13 @@ const Rating = ({ rating, setRating }) => {
       ))}
      
     </View>
+    <TextInput
+        placeholder="Write Your Comment..."
+        textAlignVertical="top"  
+        onChangeText={setComment}
+        style={styles.commentInput}
+        value={comment}
+      />
     <TouchableOpacity
         style={styles.Applybutt}
         onPress={() => Submit(HallName, rating)}
@@ -135,8 +205,11 @@ const Rating = ({ rating, setRating }) => {
 
 
 
-const Submit = async (hallName, rating) => { //submit the ratevalue to the database
+const Submit = async (hallName,rating) => { //submit the ratevalue to the database  
   try {
+    // console.log("the rating with parameters:");
+    // console.log("hallName is", hallName);
+    // console.log("rating is", rating);
     const ratingRef = doc(db, 'ratings', hallName);
     const ratingSnap = await getDoc(ratingRef);
 
@@ -147,7 +220,8 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
       const AvrRating = TotalRate / NumRating;
 
       await updateDoc(ratingRef, {
-        averageRate: AvrRating,
+        // averageRate: AvrRating,
+        comments: [{ user: fname, text: comment }]
       });
     } else {
       await setDoc(ratingRef, {//there is no collection its the first time
@@ -155,6 +229,7 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
         totalRate: rating,
         rateCount: 1,
         averageRate: rating,
+        comments: [{ user: fname, text: comment }]
       });
     }
   } catch (error) {
@@ -230,16 +305,28 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
               <View style={styles.row}>
                 <Text style={styles.lbl}>Times:</Text>
                 <View style={styles.ansCon}>
-                  <Picker
-                    selectedValue={selectedShift}
-                    onValueChange={(Val) => setSelectedShift(Val)}
-                    style={styles.picker}
-                  >
-                    <Picker.Item label="Select" value="" />
-                    {availableShifts.map((shift, i) => (
-                      <Picker.Item key={i} label={`${shift.start} - ${shift.end}`} value={shift} />
-                    ))}
-                  </Picker>
+                <Picker
+                selectedValue={selectedShift}
+                onValueChange={(Val) => setSelectedShift(Val)}
+                style={styles.picker}
+                enabled={true} // make sure that the list to be abled to open
+              >
+                <Picker.Item label="Select" value="" />
+                {availableShifts.map((shift, i) => {
+                  const shiftKey = `${selectedDate}-${shift.start} - ${shift.end}`;
+                  const status = shiftsStatus[shiftKey];
+                  const isDisabled = status === 'pending' || status === 'accepted';
+                  return (
+                    <Picker.Item
+                      key={i}
+                      style={{ color: isDisabled ? 'gray' : 'black' }}
+                      value={shift}
+                      label={shift.label}
+                      enabled={!isDisabled} //for not showing  the  pending and  accepted shifts 
+                    />
+                  );
+                })}
+              </Picker>
                 </View>
               </View>
               <View style={styles.row}>
@@ -269,24 +356,18 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
               </TouchableOpacity>
             </View>
 
-            {resReq && (
-              <View style={styles.chatbutt}>
-                <TouchableOpacity onPress={() => navigation.navigate('ChatPage')}>
-                  <Text style={{ fontWeight: 'bold', color: 'white',fontSize: 20 }}>Chat</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-            </View>
+
+    </View>  
+    </View>
             
           )}
           {activeTab === 'Rating' && ( //if the rating button clicked
             <View>
-              <Text style={{ fontSize: 20, textAlign: 'center', marginVertical: 50 }}>
-                Rate this hall
+              <Text style={{ fontSize: 20, textAlign: 'center', marginVertical: 35 ,top:10}}>
+                Rate Us
               </Text>
-              <Rating rating={rating} setRating={setRating} />
-            </View>
+              <Rating rating={rating} setRating={setRating} comment={comment} setComment={setComment} />
+              </View>
           )}
           
         </View>
@@ -314,7 +395,6 @@ const styles = StyleSheet.create({
   picker: {
     flex: 1,
     height: 50,
-    marginRight: 8,
     left: 31,
   },
   row: {
@@ -353,9 +433,9 @@ const styles = StyleSheet.create({
     height: 50,
     width: 100,
     alignItems: 'center',
-    marginTop: 1,
     left: 30,
-    marginLeft: 10
+    marginLeft: 10,
+    top:-35
   },
   answer: {
     fontSize: 15,
@@ -369,29 +449,44 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderColor: 'transparent',
     paddingVertical: 11,
+    
   },
  
   tabButTxt: {
     fontSize: 17,
-    color: '#007aff',
+    color: 'black',
+    fontWeight:"300"
   },
 
   Applybutt: {
     alignItems: 'center',
     backgroundColor: '#00e4d0',
-    marginLeft: 124,
-    width:110,
-    borderRadius: 5,
+    marginLeft: 100,
+    width:150,
     height:50,
-    top:90,
+    top:50,
+    borderRadius: 50,
     justifyContent: 'center',
-    borderWidth:1
 
   },
   Applytxt: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 17,
+  },
+
+
+  commentInput: {
+    borderRadius: 6,
+    marginHorizontal: 20,
+    padding:10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    paddingHorizontal: 10,
+    top:25,
+    backgroundColor: 'white',
+    height: 122,
+   
   },
   
 });
