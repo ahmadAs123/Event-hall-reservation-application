@@ -26,6 +26,7 @@ import SelectedHall from "./src/SelectedHall";
 import ClientReservations from "./src/ClientPages/ClientReservations";
 import EditProfile from "./src/ClientPages/EditProfile";
 import ClientProfile from "./src/ClientPages/ClientProfile";
+import ChatDetails from "./src/ChatDetails";
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -89,14 +90,21 @@ function App() {
           }}
           
         />
+      <Stack.Screen
+        name="ChatDetails"
+        component={ChatDetails}
+        options={{
+           headerShown: false,
 
+           }} 
+      />
 <Stack.Screen
           name="AdminPage"  
           component={AdminPage}
           options={{
             headerTitle: () => <Header name="AdminPage" />,
             headerStyle: {
-              height: 150,
+              height: 120,
               backgroundColor: '#00e4d0',
               
             },
@@ -104,6 +112,8 @@ function App() {
           }}
           
         />
+
+
 
 <Stack.Screen
           name="SelectedHall"  
@@ -130,7 +140,7 @@ function App() {
           options={{
             headerTitle: () => <Header name="AdminChat" />,
             headerStyle: {
-              height: 150,
+              height: 120,
               backgroundColor: '#00e4d0',
               
             },
