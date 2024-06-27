@@ -16,18 +16,6 @@ const AdminComponent = () => {
   const [loading, setLoading] = useState(false); 
 
 
-
-  
-  const handleLogout = async () => {
-    try {
-      setLoading(true); 
-      await auth.signOut();
-      navigation.navigate('StartPage');
-    } catch (error) {
-      console.log('Error logging out: ', error);
-    }
-  };
-
   const handlePostHall = () => {
     navigation.navigate('PostHall'); 
   };
@@ -43,13 +31,7 @@ const AdminComponent = () => {
       </TouchableOpacity>
 
 
-      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-      {loading ? (
-          <ActivityIndicator color="white" /> 
-        ) : (
-          <Text style={styles.logoutButtonText}>Logout</Text>  
-          )}
-      </TouchableOpacity>
+     
       
     </View>
     </View>
@@ -94,7 +76,7 @@ const AdminPage = () => {
 
 
      <Tab.Screen
-      name="MyHalls"
+      name="Halls Requests"
       component={AdminHalls}
       options={{
         tabBarIcon: ({ color}) => (
@@ -109,12 +91,13 @@ const AdminPage = () => {
       name="Chat"
       component={AdminChat}
       options={{
-        tabBarIcon: ({ color}) => (
-          <Icon name="settings" type="feather" color={color} size={29} />
+        tabBarIcon: ({ color }) => (
+          <Icon name="chat" type="material" color={color} size={29} />
         ),
         headerShown: false,
       }}
     />
+    
   </Tab.Navigator>
   );
 };
