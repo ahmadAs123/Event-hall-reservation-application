@@ -79,7 +79,6 @@ const SelectedHall = ({ navigation }) => {
     const q = query(
       collection(db, "reservations"),
       where("hallName", "==", HallName),
-      where("userId", "==", uid)
     );
     const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
       const newShiftsStatus = {};
