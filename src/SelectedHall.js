@@ -108,9 +108,9 @@ const SelectedHall = ({ navigation }) => {
       .map(shift => {
         const shiftKey = `${date}-${shift.start} - ${shift.end}`;
         const status = shiftsStatus[shiftKey];
-        return { ...shift, status, label: `${shift.start} - ${shift.end}${status === 'pending' ? ' (pending)' : ''}` };
+        return { ...shift, status, label: `${shift.start} - ${shift.end}` };
       })
-      .filter(shift => shift.status !== 'accepted'); // Remove accepted shifts
+      .filter(shift => shift.status !== 'accepted' && shift.status !== 'pending' ); // Remove accepted shifts and pending
     setAvailableShifts(filteredShifts);
   };
   
@@ -135,8 +135,26 @@ const SelectedHall = ({ navigation }) => {
           firstName = userData.firstName;
           lastName = userData.lastName;
         });
-          const fullName = `${firstName} ${lastName}`;
-          setFname(fullName)
+
+        const fullName = `${firstName} ${lastName}`;
+        setFname(fullName);
+        // Check if there is  existing reservation before to use it 
+        const reservationQuery = query(
+          collection(db, "reservations"),
+          where("hallName", "==", HallName),
+          where("date", "==", selectedDate),
+          where("shift", "==", `${selectedShift.start} - ${selectedShift.end}`),
+          where("userId", "==", uid)
+        );
+        const reservationSnapshot = await getDocs(reservationQuery);
+        if (!reservationSnapshot.empty) {
+          // If reservation already exists use it to make update to the status 
+          reservationSnapshot.forEach(async (doc) => {
+            const reservationId = doc.id;
+            await updateDoc(doc.ref, { status });
+          });
+        } else {
+          // If the reservation is new and there is no  existing reservation before
           const resData = {
             hallName: HallName,
             shift: `${selectedShift.start} - ${selectedShift.end}`,
@@ -155,6 +173,7 @@ const SelectedHall = ({ navigation }) => {
           } 
           catch (error) {
             console.error("Error adding reservation data to Firestore:", error);
+          }
           }} 
         catch (error) {
         console.error("Error while fetching user data:", error);
@@ -162,7 +181,6 @@ const SelectedHall = ({ navigation }) => {
     }
     setSelectedShift('');
   };
-
 
 
 const Rating = ({ rating, setRating }) => {
