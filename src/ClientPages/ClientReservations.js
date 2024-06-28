@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet ,Image } from 'react-native';
 import { db } from "../../config";
 import { collection, getDocs , query, where, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { MaterialIcons } from '@expo/vector-icons'; 
 
 const ClientReservations = () => {
+  const navigation = useNavigation(); 
   const [ALL_res, setAll_Res] = useState([]);
   const [user, setUser] = useState(null); // for shuring that user is authenticated
 
@@ -71,13 +74,20 @@ const dltRes = async (id) => {
               </Text>
               <MaterialIcons name={SIcon} size={22} color={SColor} style={{marginLeft: 5}} />
             </View>
-        <TouchableOpacity onPress={() => dltRes(item.id)} style={styles.dltButt}>
-          <Text style={styles.dltButttxt}>Cancel</Text>
-        </TouchableOpacity>
+            <View style={styles.buttCont}>
+              <TouchableOpacity onPress={() => dltRes(item.id)} style={styles.dltButt}>
+                <Text style={styles.dltButttxt}>Cancel</Text>
+              </TouchableOpacity>
+              {item.status === 'accepted' && (
+                <TouchableOpacity onPress={() => navigation.navigate('ChatPage', { hallName: item.hallName })} style={styles.chatButt}>
+                  <FontAwesome name="comments" size={21} color="white" />
+                  <Text style={{fontWeight:'bold' ,color: 'white'}}>Chat</Text>
+                </TouchableOpacity>
+              )}
           </View>
         </View>
       </View>
-      
+      </View>
     );
   };
 
@@ -118,7 +128,7 @@ const styles = StyleSheet.create({
     padding: 8,
     width:100,
     marginTop: 30,
-    right:'27%'
+    right:'65%'
   },
   ResText: {
     fontSize: 17,
@@ -144,13 +154,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  
+
+  buttCont: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+    
   header: {
     fontSize: 23,
     fontWeight: 'bold',
     top:-3
   },
-  
+  chatButt: {
+    marginLeft:-5, 
+    backgroundColor: 'blue',
+    width: 70,
+    marginTop:30,
+    borderRadius: 6,
+    alignItems: 'center',
+    height:37,
+  },
+ 
 });
 
 export default ClientReservations;
