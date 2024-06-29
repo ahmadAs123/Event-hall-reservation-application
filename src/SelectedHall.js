@@ -49,7 +49,8 @@ const SelectedHall = ({ navigation }) => {
                 location: post.place,
                 images: post.images && post.images.length > 0 ? post.images : [], // if there is images push else make it empty 
                 type: post.type,
-                availableDates: post.selectedDates 
+                availableDates: post.selectedDates ,
+                Id :userData.userId 
               });
               availableDates.push(...Object.keys(post.selectedDates));
             }
@@ -65,8 +66,8 @@ const SelectedHall = ({ navigation }) => {
     fetchData();
   }, [HallName]);
 
+// console.log(hallsData[0].Id)
   const ImgContHeight = Height * 0.25;
-
   useEffect(() => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -164,6 +165,7 @@ const SelectedHall = ({ navigation }) => {
             images: hall.images,
             Name: fullName,
             status: status,
+            OwnerID:hallsData[0].Id
           };
 
           try{
