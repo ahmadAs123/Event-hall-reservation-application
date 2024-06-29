@@ -32,7 +32,7 @@ const ClientReservations = () => {
       const resColl = collection(db, 'reservations');
       const q = query(resColl, where('userId', '==', uid));
       const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => { //to get all halls reservations
-        const UserRes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const UserRes = querySnapshot.docs.map(doc => ({ id: doc.id, OwnerId: doc.data().OwnerID,...doc.data() }));// Assuming OwnerId is a property in your reservation document
         setAll_Res(UserRes);
       });
 
@@ -79,7 +79,7 @@ const dltRes = async (id) => {
                 <Text style={styles.dltButttxt}>Cancel</Text>
               </TouchableOpacity>
               {item.status === 'accepted' && (
-                <TouchableOpacity onPress={() => navigation.navigate('ChatPage', { hallName: item.hallName })} style={styles.chatButt}>
+                <TouchableOpacity onPress={() =>navigation.navigate('ChatPage', {OwnerId: item.OwnerID,hallName: item.hallName,})} style={styles.chatButt}>
                   <FontAwesome name="comments" size={21} color="white" />
                   <Text style={{fontWeight:'bold' ,color: 'white'}}>Chat</Text>
                 </TouchableOpacity>
