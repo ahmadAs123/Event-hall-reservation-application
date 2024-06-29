@@ -29,15 +29,17 @@ const ClientChat = () => {
           if (!messagesSnapshot.empty) {
             for (const messageDoc of messagesSnapshot.docs) {
               const messageData = messageDoc.data();
-              if (messageData.user?._id !== currentUser.uid) {
-                lastMessageUserName = messageData.user?.name || 'Unknown';
 
-                // Fetch user image URL from the users collection
-                const userQuery = query(collection(db, 'users'), where('userId', '==', messageData.user?._id));
+                // Fetch user image URL from the users collection and the Ownerid exist in one of the chats doc
+                if (messageData.user && messageData.user.OwnerID) {
+                const OwnerId = messageData.user.OwnerID;
+                const userQuery = query(collection(db, 'users'), where('userId', '==', OwnerId));
                 const userQuerySnapshot = await getDocs(userQuery);
+
                 if (!userQuerySnapshot.empty) {
                   const userData = userQuerySnapshot.docs[0].data();
                   imageURL = userData.imageURL || ''; // Get the user's image URL
+                  lastMessageUserName= userData.firstName + "  " + userData.lastName
                 }
                 break;
               }
@@ -68,17 +70,22 @@ const ClientChat = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Chats </Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        
         <FlatList
           data={chats}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.chatItem} onPress={() => handleChatPress(item)}>
-              <View style={styles.chatItemContent}>
+            <TouchableOpacity style={styles.card} onPress={() => handleChatPress(item)}>
+              <View style={styles.cardContent}>
                 <Image
                   source={item.imageURL ? { uri: item.imageURL } : require('../../assets/image.png')} // Use placeholder if no image URL
                   style={styles.userImage}
                 />
-                <View>
+                <View style={{flex: 1}}>
                   <Text style={styles.userName}>{item.lastUser}</Text>
                   <Text style={styles.hallName}>{item.name + " Hall Owner"}</Text>
                 </View>
@@ -86,33 +93,46 @@ const ClientChat = () => {
             </TouchableOpacity>
           )}
         />
-     
+      )}
     </View>
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    padding: 10,
+    backgroundColor:'#f0f0f0'
+  },
 
+  header: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    top:-2,
+    marginBottom:11,
+    left:10
   },
-  chatItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  chatItemContent: {
+  cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-  
+    padding: 10,
   },
+
   userImage: {
     width: 60,
     height: 60,
     borderRadius: 50,
     marginRight: 10,
   },
+
+  card: {
+    backgroundColor: 'white',
+    marginBottom: 11,
+    borderRadius: 11,
+    elevation: 4,
+  },
+  
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -121,7 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
   },
- 
 });
 
 export default ClientChat;
