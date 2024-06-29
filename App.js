@@ -153,11 +153,8 @@ function App() {
           name="ChatPage"  
           component={ChatPage}
           options={{
-            headerStyle: {
-              height: 120,
-              backgroundColor: '#00e4d0',
-              
-            },
+            headerShown: false,
+
           }}
         />
 
