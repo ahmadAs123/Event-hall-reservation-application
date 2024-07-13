@@ -27,6 +27,11 @@ import ClientReservations from "./src/ClientPages/ClientReservations";
 import EditProfile from "./src/ClientPages/EditProfile";
 import ClientProfile from "./src/ClientPages/ClientProfile";
 import ChatDetails from "./src/ChatDetails";
+import AdminPosts from "./src/AdminPages/AdminPosts";
+import EditPost from "./src/AdminPages/EditPost";
+import AdminComments from "./src/AdminPages/AdminComments";
+import AdminPays from "./src/AdminPages/AdminPays";
+
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -94,9 +99,40 @@ function App() {
         name="ChatDetails"
         component={ChatDetails}
         options={{
-           headerShown: false,
 
            }} 
+      />
+
+<Stack.Screen
+        name="AdminComments"
+        component={AdminComments}
+        options={{
+          headerTitle: () => <Header name="AdminComments" />,
+          headerStyle: {
+            height: 120,
+            backgroundColor: '#00e4d0',
+            
+          },
+        }}
+      />
+
+
+<Stack.Screen
+        name="EditPost"
+        component={EditPost}
+        options={({ navigation }) => ({
+          headerTitle: () => <Header name="EditPost" />,
+          headerStyle: {
+            height: 120,
+            backgroundColor: '#00e4d0',
+           
+          },
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('AdminPosts')}>
+              <Icon name="arrow-back" size={30} color={'white'}/>
+            </TouchableOpacity>
+          ),
+        })}
       />
 <Stack.Screen
           name="AdminPage"  
@@ -121,7 +157,7 @@ function App() {
           options={({ navigation }) => ({
             headerTitle: () => <Header name="OptionsPage" />,
             headerStyle: {
-              height: 120,
+              height: 100,
               backgroundColor: '#00e4d0',
              
             },
@@ -158,6 +194,42 @@ function App() {
           }}
         />
 
+<Stack.Screen
+          name="AdminPays"  
+          component={AdminPays}
+          options={({ navigation }) => ({
+            headerTitle: () => <Header name="AdminChat" />,
+            headerStyle: {
+              height:120,
+              backgroundColor: '#00e4d0',
+             
+            },
+            headerLeft: () =>(
+              <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
+              <Icon name="arrow-back" size={30} color={'white'}/>
+              </TouchableOpacity>
+            )
+          })}
+        />
+
+<Stack.Screen
+          name="AdminPosts"  
+          component={AdminPosts}
+          options={({ navigation }) => ({
+            headerTitle: () => <Text style={{ fontSize: 24, color: 'black' , fontWeight:'bold' }}>My Posts</Text>,
+            headerStyle: {
+              height:100,
+              backgroundColor: '#00e4d0',
+             
+            },
+            headerLeft: () =>(
+              <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
+              <Icon name="arrow-back" size={30} color={'white'}/>
+              </TouchableOpacity>
+            )
+          })}
+        />
+
 
 <Stack.Screen
           name="OptionsPage"  
@@ -171,7 +243,7 @@ function App() {
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}
@@ -189,7 +261,7 @@ function App() {
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('StartPage')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}
@@ -208,7 +280,7 @@ function App() {
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}
@@ -227,7 +299,7 @@ function App() {
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}
@@ -254,15 +326,15 @@ function App() {
           name="PostHall"
           component={PostHall}
           options={({ navigation }) => ({
-            headerTitle: () => <Header name="ForrgotPassword" />,
+            headerTitle: () => <Header name="PostHall" />,
             headerStyle: {
-              height: 120,
+              height: 100,
               backgroundColor: '#00e4d0',
              
             },
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
-                <Icon name="arrow-back" size={30}/>
+                <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             ),
           })}
@@ -273,13 +345,13 @@ function App() {
           options={({ navigation }) => ({
             headerTitle: () => <Header name="AdminProfile" />,
             headerStyle: {
-              height: 150,
+              height: 120,
               backgroundColor: '#00e4d0',
              
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}
@@ -297,7 +369,7 @@ function App() {
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}
@@ -316,7 +388,7 @@ function App() {
             },
             headerLeft: () =>(
               <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
-              <Icon name="arrow-back" size={30}/>
+              <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )
           })}

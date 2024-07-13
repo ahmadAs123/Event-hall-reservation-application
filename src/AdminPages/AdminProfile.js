@@ -9,6 +9,8 @@ import { auth, db ,storage } from '../../config';
 import { collection, query, where, getDocs ,doc,updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import {  uploadBytes } from 'firebase/storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';  
+
 
 const AdminProfile = () => {
   const navigation = useNavigation();
@@ -103,6 +105,20 @@ const AdminProfile = () => {
     }
   };
 
+  
+  const handleNavigateToAdminPosts = () => {
+    navigation.navigate('AdminPosts');  
+  };
+
+  const NavToPays = () => {
+    navigation.navigate('AdminPays');
+  };
+
+  const NavToComm = () => {
+    navigation.navigate('AdminComments');
+  };
+  
+
   const Logout = async () => {
     try {
       await auth.signOut();
@@ -149,7 +165,19 @@ const AdminProfile = () => {
       </View>
 
       <View style={styles.section}>
-      </View>
+  <TouchableOpacity style={styles.Itm} onPress={handleNavigateToAdminPosts}>
+    <MaterialIcons name="post-add" size={21} color="#00e4d4" />
+    <Text style={styles.ItmText}>My Posts</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.Itm} onPress={NavToComm}>
+    <FontAwesome5 name="comment" size={17} color="#00e4d4" />
+    <Text style={styles.ItmText}>Comments</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.Itm} onPress={NavToPays}>
+    <MaterialCommunityIcons name="cash" size={21} color="#00e4d4" />
+    <Text style={styles.ItmText}>Pays</Text>
+  </TouchableOpacity>
+</View>
       <View style={styles.logout}>
       <TouchableOpacity onPress={Logout}>
         <MaterialIcons name="logout" size={30} color="#666" />
@@ -169,7 +197,6 @@ const styles = StyleSheet.create({
   logout: {
     alignItems: 'center',
     justifyContent:'center',
-    padding: 33,
     left:11
   },
 
@@ -251,6 +278,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  ItmText: {
+    color: 'black',
+    marginLeft: 11,
+    fontSize: 16,
+  },
+
+  Itm: {
+    flexDirection: 'row',
+    paddingVertical: 9,
+    backgroundColor: '#f0f0f0',
+    marginBottom:11,
+    borderRadius: 1,
+    alignItems: 'center',
+    paddingHorizontal: 14,
+
+  },
+  
+  
+  
 
 });
 
