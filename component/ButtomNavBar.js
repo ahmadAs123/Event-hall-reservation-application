@@ -7,7 +7,7 @@ import ListHalls from "../src/ListHalls";
 
 const Tab = createBottomTabNavigator();
 
-function ButtomNavBar({ searchValue }) {
+function ButtomNavBar({ searchValue,filter ,sortOrder }) {
 
     return (
       <Tab.Navigator
@@ -27,7 +27,7 @@ function ButtomNavBar({ searchValue }) {
        
         <Tab.Screen
           name="List"
-          initialParams={{searchValue}} 
+          initialParams={{searchValue ,filter ,sortOrder }} 
           component={ListHalls}
           options={{
             tabBarIcon: () => (
@@ -38,6 +38,7 @@ function ButtomNavBar({ searchValue }) {
         />
          <Tab.Screen
           name="Map"
+          initialParams={{searchValue}} 
           component={MapHalls}
           options={{
             tabBarIcon: () => (

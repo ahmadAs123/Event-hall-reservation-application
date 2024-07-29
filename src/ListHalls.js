@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList,ScrollView ,StyleSheet, TouchableOpacity } from 'react-native';
 import { collection, getDocs, query, where } from "firebase/firestore";
-// import StarRating from 'react-native-star-rating'; // Import the star rating component
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'
 import {db} from "../config"; // Import Firestore instance
 import LoadingPage from '../component/LoadingPage';
@@ -21,14 +21,11 @@ const ListItem = ({ item }) => {
         <View style={styles.text}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.loc}>{item.location}</Text>
+          <View style={styles.ratingContainer}>
+          <FontAwesome name="star" size={20} color="gold" />
+          <Text style={styles.ratingText}>4.5</Text>
         </View>
-        <View style={styles.stars}>
-          {/* <StarRating
-            starSize={20}
-            maxStars={5}
-            emptyStarColor="gold"
-          /> */}
-          </View>
+        </View>      
       </View>
     </TouchableOpacity>
     </View>
@@ -40,12 +37,11 @@ const ListHalls = ({ route }) => {
   const [hallsData, setHallsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const searchValue = route.params.searchValue;
+  const filter = route.params.filter;
+  const sortOrder =route.params.sortOrder 
+  console.log(route.params)
+  console.log(searchValue)
 
-  const SelectCountry = (place ) => {
-    console.log("Selected ", place );
-  };
-
-  const countries = ["Jerusalem", "Tel Aviv", "Haifa" , "Bet hanina" , "kufar akkab"]; 
 
   useEffect(() => {
 
@@ -59,19 +55,22 @@ const ListHalls = ({ route }) => {
     const userPosts = userData['posted halls'] || []; //get all the posted halls data
 
      userPosts.forEach((post, index) => {      
-      if(post.place===searchValue){
+      if(post.city===searchValue){
       hallsData.push({  //push all the posts data that fulfill the if statment
         id: index.toString(),
         name: post.hallName,
         location: post.place,
-        image: post.images && post.images.length > 0 ? post.images[0] : null
-      
+        image: post.images && post.images.length > 0 ? post.images[0] : null,
+        cost: post.costPerHour, 
+        capacity: post.capacity,
+        // rating: post.rating
       });
     }
     });
 });
+        const sortedHallsData = applySorting(hallsData, filter ,sortOrder);
 
-        setHallsData(hallsData);
+        setHallsData(sortedHallsData);
         setLoading(false); 
 
       } catch (err) {
@@ -80,9 +79,25 @@ const ListHalls = ({ route }) => {
     };
 
     fetchData(); 
-  }, [searchValue]); 
+  }, [searchValue,filter ,sortOrder]); 
 
+  const applySorting = (data, filter, sortOrder) => {
+    const keys = Object.keys(filter).filter(key => filter[key]);
+    if (keys.length === 0) return data;
+  
+    return data.sort((a, b) => {
+      for (let key of keys) {
+        const order = sortOrder[key];
+        const factor = order === 'asc' ? 1 : -1;
+  
+        if (a[key] < b[key]) return -1 * factor;
+        if (a[key] > b[key]) return 1 * factor;
+      }
+      return 0;
+    });
+  };
 
+  
   if (loading) { // checking if the state loading true to present the loading screen
     return(<LoadingPage/>)
   }
@@ -92,17 +107,6 @@ const ListHalls = ({ route }) => {
 
    
      <View style={{ flex: 0 }}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.countryRow}>
-          {countries.map((place, index) => (
-            <TouchableOpacity key={index} onPress={() => SelectCountry(place)}>
-              <View style={styles.countryButton}>
-                <Text style={styles.palce}>{place}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
       {hallsData.length === 0 ? (
       <Text style={styles.Empty_HallsText}>There are no halls in this area !</Text>
        ) : (
@@ -153,25 +157,8 @@ const styles = StyleSheet.create({
   },
 
  
-  countryRow: {
-    flexDirection: 'row',
-   justifyContent: 'space-around',
-   backgroundColor: 'white',
-   height:50,
-   paddingTop:8
- },
 
- countryButton: {
-   borderRadius: 100,
-   borderWidth: 2,
-   borderColor: 'white',
-   paddingHorizontal: 10,
-   paddingVertical: 6,
-   paddingRight:7,
-   backgroundColor: '#f5f5f5', 
-   marginRight: 4, 
- },
-
+ 
  
 text:{
   fontSize: 13,
@@ -199,6 +186,18 @@ text:{
     fontWeight: 'bold',
     fontSize: 17,
   },
+  ratingContainer: {
+    flexDirection: 'row',
+    marginTop: 5,
+    alignItems: 'center',
+  },
+  
+  ratingText: {
+    marginLeft: 5,
+    color: 'gray',
+    fontSize: 16,
+  },
+  
 });
 
 export default ListHalls;
