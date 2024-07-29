@@ -31,6 +31,10 @@ import AdminPosts from "./src/AdminPages/AdminPosts";
 import EditPost from "./src/AdminPages/EditPost";
 import AdminComments from "./src/AdminPages/AdminComments";
 import AdminPays from "./src/AdminPages/AdminPays";
+import AdminTasks from './src/AdminPages/AdminTasks'
+import Tasks from "./src/AdminPages/Tasks";
+import Expenses from "./src/AdminPages/Expenses";
+
 
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
@@ -95,12 +99,39 @@ function App() {
           }}
           
         />
+
+<Stack.Screen
+          name="Tasks"  
+          component={Tasks}
+          options={{
+            headerTitle: () => <Header name="EditProfile" />,
+            headerStyle: {
+              height: 120,
+              backgroundColor: '#00e4d0',
+            },
+          }}  
+        />
+
+
+
+<Stack.Screen
+          name="Expenses"  
+          component={Expenses}
+          options={{
+            headerTitle: () => <Header name="Expenses" />,
+            headerStyle: {
+              height: 120,
+              backgroundColor: '#00e4d0',
+            },
+          }}  
+        />
+        
+
+        
       <Stack.Screen
         name="ChatDetails"
         component={ChatDetails}
-        options={{
-
-           }} 
+        options={{ headerShown: false }}
       />
 
 <Stack.Screen
@@ -123,7 +154,7 @@ function App() {
         options={({ navigation }) => ({
           headerTitle: () => <Header name="EditPost" />,
           headerStyle: {
-            height: 120,
+            height: 100,
             backgroundColor: '#00e4d0',
            
           },
@@ -170,6 +201,24 @@ function App() {
           
         />
 
+<Stack.Screen
+          name="AdminTasks"  
+          component={AdminTasks}
+          options={({ navigation }) => ({
+            headerTitle: () => <Header name="AdminTasks" />,
+            headerStyle: {
+              height: 100,
+              backgroundColor: '#00e4d0',
+             
+            },
+            // headerLeft: () =>(
+            //   <TouchableOpacity onPress={() => navigation.navigate('OptionsPage')}>
+            //   <Icon name="arrow-back" size={30}/>
+            //   </TouchableOpacity>
+            // )
+          })}
+          
+        />
 <Stack.Screen
           name="AdminChat"  
           component={AdminChat}
@@ -397,7 +446,6 @@ function App() {
 
          
       </Stack.Navigator>
-      
     </NavigationContainer>
   );
 }
