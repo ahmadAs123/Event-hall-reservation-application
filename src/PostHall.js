@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button, Modal, StyleSheet,PermissionsAndroid  } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button, Modal, StyleSheet,PermissionsAndroid, FlatList } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -17,6 +17,8 @@ const storage = getStorage();
 const PostHall = ({ navigation }) => {
   const [hallName, setHallName] = useState('');
   const [type, setType] = useState('');
+  const [city, setCity] = useState('');
+  const [points, setPoints] = useState(1000);
   const [place, setPlace] = useState('');
   const [image, setImage] = useState([]);
   const [costPerHour, setCostPerHour] = useState('');
@@ -34,6 +36,61 @@ const PostHall = ({ navigation }) => {
   const [showMap, setShowMap] = useState(false);
   const [mapRegion, setMapRegion] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [filteredTypes, setFilteredTypes] = useState([]);
+
+  const [cities] = useState([
+    'Jerusalem', 'Tel Aviv', 'Haifa', 'Beersheba', 'Netanya',
+    'Rishon LeZion', 'Petah Tikva', 'Ashdod', 'Holon', 'Bnei Brak',
+    'Bat Yam', 'Kfar Saba', 'Ra\'anana', 'Herzliya', 'Nahariya',
+    'Safed', 'Tiberias', 'Eilat', 'Akko (Acre)', 'Kiryat Shmona',
+    'Jaffa', 'Modi\'in-Maccabim-Re\'ut', 'Hadera', 'Or Akiva',
+    'Arad', 'Be\'er Sheva', 'Ramat Gan', 'Ramat Hasharon', 'Zichron Yaakov',
+    'Kiryat Yam', 'Kiryat Motzkin', 'Kiryat Ata', 'Yavne', 'Lod',
+    'Ramla', 'Elad', 'Givatayim', 'Giv\'at Shmuel', 'Baqa al-Gharbiyye',
+    'Tira'
+  ]);
+  
+  const [types] = useState([
+   'Weddings','Educational','Food Hall','Condolence Tents'
+  ]);
+
+
+  const handleTextChange = (text) => {
+    setCity(text);
+    if (text) {
+      const filtered = cities.filter(city => 
+        city.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredCities(filtered);
+    } else {
+      setFilteredCities([]);
+    }
+  };
+
+  const handleTypeChange = (text) => {
+    setType(text);
+    if (text) {
+      const filtered = types.filter(type => 
+        type.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredTypes(filtered);
+    } else {
+      setFilteredTypes([]);
+    }
+  };
+
+
+  const handleSelectType = (selectedType) => {
+    setType(selectedType);
+    setFilteredTypes([]);
+  };
+
+  const handleSelectCity = (selectedCity) => {
+    setCity(selectedCity);
+    setFilteredCities([]);
+  };
+
 
 
   const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
@@ -121,6 +178,12 @@ const PostHall = ({ navigation }) => {
   
   const pickImg = async () => { // pick image from the gallary phone
     try {
+
+      if (image.length >= 4) {
+        alert('You can only select up to 4 images.');
+        return;
+      }
+
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -132,6 +195,10 @@ const PostHall = ({ navigation }) => {
       if (!result.canceled) {
         const ImageURLs = [];
         for (const asset of result.assets) {
+          if (image.length + ImageURLs.length >= 4) {
+            alert('You can only select up to 4 images.');
+            break;
+          }
           const response = await fetch(asset.uri);
           const blob = await response.blob();
           const filename = asset.uri.substring(asset.uri.lastIndexOf('/') + 1);
@@ -162,7 +229,9 @@ const PostHall = ({ navigation }) => {
         selectedDates,
         images: image,
         type,
-        jobOffers  
+        jobOffers,
+        city,
+        points
       };
   // getting the uid of the user that logged in 
       const currentUser = auth.currentUser;
@@ -230,7 +299,6 @@ const PostHall = ({ navigation }) => {
     
     <View style={styles.container}>
       <View style={styles.boxcontainer}>
-        <Text style={{ fontWeight: 'bold', fontSize: 35, textAlign: 'center' }}>Post Hall</Text>
         <View style={{ marginTop: 18 }}></View>
 
         <TextInput       // the feilds of the post hall 
@@ -240,12 +308,52 @@ const PostHall = ({ navigation }) => {
           onChangeText={text => setHallName(text)}
         />
 
-        <TextInput
-          style={styles.TextInput}
-          placeholder="Type"
-          value={type}
-          onChangeText={text => setType(text)}
-        />
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Type"
+                value={type}
+                onChangeText={handleTypeChange}
+              />
+              {filteredTypes.length > 0 && (
+                <FlatList
+                data={filteredTypes}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleSelectType(item)}
+                  >
+                    <Text style={{fontSize: 16,}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                style={styles.TypeList}
+              />
+              )}
+     
+
+
+              <TextInput
+                style={styles.TextInput}
+                placeholder="City"
+                value={city}
+                onChangeText={handleTextChange}
+              />
+              {filteredCities.length > 0 && (
+                <FlatList
+                data={filteredCities}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleSelectCity(item)}
+                  >
+                    <Text style={{fontSize: 16,}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                style={styles.suggestionList}
+              />
+              )}
+     
 
 
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -339,7 +447,7 @@ const PostHall = ({ navigation }) => {
           onChangeText={text => setCostPerHour(text)}
         />
 
-        <TouchableOpacity onPress={pickImg} style={styles.picButt}>  
+        <TouchableOpacity onPress={pickImg} style={styles.picButt}  >  
           <Text style={styles.buttonText}>Select Pictures</Text>
         </TouchableOpacity>
 
@@ -684,7 +792,46 @@ const styles = StyleSheet.create({
     zIndex: 2,
     top:55    
   },
+
   
+  item: {
+    padding: 10,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+    backgroundColor: '#f9f9f9',
+
+  },
+
+  
+
+  suggestionList: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    borderColor: '#ddd',
+    left: 30,
+    right: 30,
+    top:305,
+    maxHeight:255,
+    borderWidth: 2,
+    zIndex: 1000, 
+
+  },
+
+  TypeList:{
+    position: 'absolute',
+    left: 30,
+    borderRadius: 6,
+    borderColor: '#ddd',
+    borderWidth: 2,
+    zIndex: 1000, 
+    right: 30,
+    top:230,
+    maxHeight:255,
+    backgroundColor: '#fff',
+  
+  }
+
 });
 
 export default PostHall;
