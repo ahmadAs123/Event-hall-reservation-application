@@ -38,6 +38,8 @@ const PostHall = ({ navigation }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [filteredCities, setFilteredCities] = useState([]);
   const [filteredTypes, setFilteredTypes] = useState([]);
+  const [showTypesDropdown, setShowTypesDropdown] = useState(false);
+  const [showCitiesDropdown, setShowCitiesDropdown] = useState(false);
 
   const [cities] = useState([
     'Jerusalem', 'Tel Aviv', 'Haifa', 'Beersheba', 'Netanya',
@@ -64,7 +66,7 @@ const PostHall = ({ navigation }) => {
       );
       setFilteredCities(filtered);
     } else {
-      setFilteredCities([]);
+      setFilteredCities(cities);
     }
   };
 
@@ -76,7 +78,7 @@ const PostHall = ({ navigation }) => {
       );
       setFilteredTypes(filtered);
     } else {
-      setFilteredTypes([]);
+      setFilteredTypes(types);
     }
   };
 
@@ -84,13 +86,16 @@ const PostHall = ({ navigation }) => {
   const handleSelectType = (selectedType) => {
     setType(selectedType);
     setFilteredTypes([]);
+    setShowTypesDropdown(false);
+
   };
 
   const handleSelectCity = (selectedCity) => {
     setCity(selectedCity);
     setFilteredCities([]);
-  };
+    setShowCitiesDropdown(false);
 
+  };
 
 
   const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
@@ -310,34 +315,16 @@ const PostHall = ({ navigation }) => {
 
               <TextInput
                 style={styles.TextInput}
-                placeholder="Type"
-                value={type}
-                onChangeText={handleTypeChange}
-              />
-              {filteredTypes.length > 0 && (
-                <FlatList
-                data={filteredTypes}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.item}
-                    onPress={() => handleSelectType(item)}
-                  >
-                    <Text style={{fontSize: 16,}}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-                style={styles.TypeList}
-              />
-              )}
-     
-
-
-              <TextInput
-                style={styles.TextInput}
                 placeholder="City"
                 value={city}
                 onChangeText={handleTextChange}
+                onFocus={() => {
+                  setShowCitiesDropdown(true);
+                  setFilteredCities(cities); // Show all cities on focus
+                }}
+
               />
+
               {filteredCities.length > 0 && (
                 <FlatList
                 data={filteredCities}
@@ -347,10 +334,10 @@ const PostHall = ({ navigation }) => {
                     style={styles.item}
                     onPress={() => handleSelectCity(item)}
                   >
-                    <Text style={{fontSize: 16,}}>{item}</Text>
+                    <Text style={{fontSize: 16}}>{item}</Text>
                   </TouchableOpacity>
                 )}
-                style={styles.suggestionList}
+                style={styles.cityList}
               />
               )}
      
@@ -430,6 +417,34 @@ const PostHall = ({ navigation }) => {
         <TouchableOpacity onPress={() => setShowShiftsModal(true)}>
           <Text style={ { color: 'blue' ,  left:230 ,top:-15 , textDecorationLine: 'underline' }}>Show Shifts</Text>
         </TouchableOpacity>
+
+
+        <TextInput
+                style={styles.TextInput}
+                placeholder="Type"
+                value={type}
+                onChangeText={handleTypeChange}
+                onFocus={() => {
+                  setShowTypesDropdown(true);
+                  setFilteredTypes(types); // Show all types on focus
+                }}
+              />
+              {filteredTypes.length > 0 && (
+                <FlatList
+                data={filteredTypes}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleSelectType(item)}
+                  >
+                    <Text style={{fontSize: 16}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                style={styles.TypeList}
+              />
+              )}
+
 
         <TextInput
           style={styles.TextInput}
@@ -826,11 +841,24 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     zIndex: 1000, 
     right: 30,
-    top:230,
+    top:460,
     maxHeight:255,
     backgroundColor: '#fff',
   
-  }
+  },
+  cityList: {
+    borderRadius: 5,
+    borderColor: '#ddd',
+    position: 'absolute',
+    maxHeight:256,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    left: 30,
+    right: 30,
+    top:230,
+    zIndex: 1000, 
+  },
+
 
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button, Modal, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button, Modal, StyleSheet ,FlatList} from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -18,6 +18,7 @@ const EditPost = ({ route, navigation }) => {
   const { hall } = route.params; 
   const [hallName, setHallName] = useState(hall.hallName || '');
   const [type, setType] = useState(hall.type || '');
+  const [city, setCity] = useState(hall.city || '');
   const [place, setPlace] = useState(hall.place || '');
   const [image, setImage] = useState(hall.images || []);
   const [costPerHour, setCostPerHour] = useState(hall.costPerHour || '');
@@ -35,6 +36,65 @@ const EditPost = ({ route, navigation }) => {
   const [showMap, setShowMap] = useState(false);
   const [mapRegion, setMapRegion] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
+  const [filteredTypes, setFilteredTypes] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [showTypesDropdown, setShowTypesDropdown] = useState(false);
+  const [showCitiesDropdown, setShowCitiesDropdown] = useState(false);
+
+
+  const [cities] = useState([
+    'Jerusalem', 'Tel Aviv', 'Haifa', 'Beersheba', 'Netanya',
+    'Rishon LeZion', 'Petah Tikva', 'Ashdod', 'Holon', 'Bnei Brak',
+    'Bat Yam', 'Kfar Saba', 'Ra\'anana', 'Herzliya', 'Nahariya',
+    'Safed', 'Tiberias', 'Eilat', 'Akko (Acre)', 'Kiryat Shmona',
+    'Jaffa', 'Modi\'in-Maccabim-Re\'ut', 'Hadera', 'Or Akiva',
+    'Arad', 'Be\'er Sheva', 'Ramat Gan', 'Ramat Hasharon', 'Zichron Yaakov',
+    'Kiryat Yam', 'Kiryat Motzkin', 'Kiryat Ata', 'Yavne', 'Lod',
+    'Ramla', 'Elad', 'Givatayim', 'Giv\'at Shmuel', 'Baqa al-Gharbiyye',
+    'Tira'
+  ]);
+  
+  const [types] = useState([
+   'Weddings','Educational','Food Hall','Condolence Tents'
+  ]);
+
+
+  const handleTextChange = (text) => {
+    setCity(text);
+    if (text) {
+      const filtered = cities.filter(city => 
+        city.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredCities(filtered);
+    } else {
+      setFilteredCities(cities);
+    }
+  };
+
+  const handleTypeChange = (text) => {
+    setType(text);
+    if (text) {
+      const filtered = types.filter(type => 
+        type.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredTypes(filtered);
+    } else {
+      setFilteredTypes(types);
+    }
+  };
+
+
+  const handleSelectType = (selectedType) => {
+    setType(selectedType);
+    setFilteredTypes([]);
+  };
+
+  const handleSelectCity = (selectedCity) => {
+    setCity(selectedCity);
+    setFilteredCities([]);
+  };
+
+
 
   const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
     try {
@@ -122,6 +182,11 @@ const EditPost = ({ route, navigation }) => {
   
   const pickImg = async () => {  // pick image from the gallary phone
     try {
+      
+      if (image.length >= 4) {
+        alert('You can only select only 4 images.');
+        return;
+      }
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -133,6 +198,10 @@ const EditPost = ({ route, navigation }) => {
       if (!result.canceled) {
         const ImageURLs = [];
         for (const asset of result.assets) {
+          if (image.length + ImageURLs.length >= 4) {
+            alert('You can only select only 4 images.');
+            break;
+          }
           const response = await fetch(asset.uri);
           const blob = await response.blob();
           const filename = asset.uri.substring(asset.uri.lastIndexOf('/') + 1);
@@ -232,9 +301,7 @@ const EditPost = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.boxcontainer}>
-        <Text style={{ fontWeight: 'bold', fontSize: 35, textAlign: 'center' }}>Edit Post</Text>
         <View style={{ marginTop: 18 }}></View>
-
         <TextInput   // the feilds of the post hall 
           style={styles.TextInput}
           placeholder="Hall Name"
@@ -242,13 +309,54 @@ const EditPost = ({ route, navigation }) => {
           onChangeText={text => setHallName(text)}
         />
 
-        <TextInput
-          style={styles.TextInput}
-          placeholder="Type"
-          value={type}
-          onChangeText={text => setType(text)}
-        />
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Type"
+                value={type}
+                onChangeText={handleTypeChange}
+                onFocus={() => setShowTypesDropdown(true)}
 
+              />
+              {filteredTypes.length > 0 && (
+                <FlatList
+                data={filteredTypes}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleSelectType(item)}
+                  >
+                    <Text style={{fontSize: 16}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                style={styles.TypeList}
+              />
+              )}
+
+
+              <TextInput
+                style={styles.TextInput}
+                placeholder="City"
+                value={city}
+                onChangeText={handleTextChange}
+              />
+
+              {filteredCities.length > 0 && (
+                <FlatList
+                data={filteredCities}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleSelectCity(item)}
+                  >
+                    <Text style={{fontSize: 16}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                style={styles.cityList}
+              />
+              )}
+     
 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TextInput
         style={[styles.TextInput]}
@@ -679,6 +787,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black',
   },
+
+  item: {
+    borderBottomWidth: 1,
+    backgroundColor: '#f9f9f9',
+    padding: 10,
+    borderBottomColor: '#ddd',
+  },
+
+
+
+  cityList: {
+    borderRadius: 5,
+    borderColor: '#ddd',
+    position: 'absolute',
+    maxHeight:256,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    left: 30,
+    right: 30,
+    top:270,
+    zIndex: 1000, 
+  },
+
+  TypeList:{
+    position: 'absolute',
+    borderRadius: 5,
+    borderColor: '#ddd',
+    borderWidth: 2,
+    zIndex: 1000, 
+    backgroundColor: '#fff',
+    top:200,
+    left: 30,
+    right: 30,
+    maxHeight:256,
+
+  }
   
 });
 
