@@ -49,7 +49,9 @@ const Login = () => {
         const userType = userData.type;
         if(userData.type =='Admin')
         navigation.navigate("AdminPage");
-        else 
+        else if(userData.type =='Worker')
+        navigation.navigate("Tasks");
+        else
         navigation.navigate("HomePage");
 
       });
