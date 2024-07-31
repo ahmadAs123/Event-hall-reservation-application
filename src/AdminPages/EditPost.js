@@ -311,34 +311,10 @@ const EditPost = ({ route, navigation }) => {
 
               <TextInput
                 style={styles.TextInput}
-                placeholder="Type"
-                value={type}
-                onChangeText={handleTypeChange}
-                onFocus={() => setShowTypesDropdown(true)}
-
-              />
-              {filteredTypes.length > 0 && (
-                <FlatList
-                data={filteredTypes}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.item}
-                    onPress={() => handleSelectType(item)}
-                  >
-                    <Text style={{fontSize: 16}}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-                style={styles.TypeList}
-              />
-              )}
-
-
-              <TextInput
-                style={styles.TextInput}
                 placeholder="City"
                 value={city}
                 onChangeText={handleTextChange}
+                onFocus={() => setShowCitiesDropdown(true)}
               />
 
               {filteredCities.length > 0 && (
@@ -429,6 +405,32 @@ const EditPost = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => setShowShiftsModal(true)}>
           <Text style={{ color: 'blue', left: 230, top: -15, textDecorationLine: 'underline' }}>Show Shifts</Text>
         </TouchableOpacity>
+
+
+        <TextInput
+                style={styles.TextInput}
+                placeholder="Type"
+                value={type}
+                onChangeText={handleTypeChange}
+                onFocus={() => setShowTypesDropdown(true)}
+
+              />
+              {filteredTypes.length > 0 && (
+                <FlatList
+                data={filteredTypes}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleSelectType(item)}
+                  >
+                    <Text style={{fontSize: 16}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                style={styles.TypeList}
+              />
+              )}
+
 
         <TextInput
           style={styles.TextInput}
@@ -806,7 +808,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     left: 30,
     right: 30,
-    top:270,
+    top:200,
     zIndex: 1000, 
   },
 
@@ -817,7 +819,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     zIndex: 1000, 
     backgroundColor: '#fff',
-    top:200,
+    top:430,
     left: 30,
     right: 30,
     maxHeight:256,
