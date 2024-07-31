@@ -95,6 +95,8 @@ const SignUp = () => {
        }>
         <Picker.Item label="Admin" value="Admin" />
         <Picker.Item label="Client" value="Client" />
+        <Picker.Item label="Worker" value="Worker" />
+
       </Picker>
       </View>
     </View>
