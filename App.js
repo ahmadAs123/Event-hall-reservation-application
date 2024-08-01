@@ -34,7 +34,7 @@ import AdminPays from "./src/AdminPages/AdminPays";
 import AdminTasks from './src/AdminPages/AdminTasks'
 import Tasks from "./src/AdminPages/Tasks";
 import Expenses from "./src/AdminPages/Expenses";
-
+import TasksList from './src/AdminPages/TasksList'
 
 const initFirebaseAuth = () => {
   const [initializing, setInitializing] = useState(true);
@@ -109,6 +109,7 @@ function App() {
               height: 120,
               backgroundColor: '#00e4d0',
             },
+            headerLeft: () => null,
           }}  
         />
 
@@ -407,6 +408,19 @@ function App() {
         />
 
 <Stack.Screen
+          name="ClientProfile"
+          component={ClientProfile}
+          options={({ navigation }) => ({
+            headerTitle: () => <Header name="ClientProfile" />,
+            headerStyle: {
+              height: 120,
+              backgroundColor: '#00e4d0',  
+            },
+            headerLeft: () => null,
+          })}
+        />
+
+<Stack.Screen
           name="Adminsetting"
           component={Adminsetting}
           options={({ navigation }) => ({
@@ -444,7 +458,22 @@ function App() {
         />
 
 
-         
+<Stack.Screen
+          name="TasksList"
+          component={TasksList}
+          options={({ navigation }) => ({
+            headerTitle: () => <Header name="TasksList" />,
+            headerStyle: {
+              height: 120,
+              backgroundColor: '#00e4d0',
+             
+            },
+            headerLeft: () =>(
+              <TouchableOpacity onPress={() => navigation.navigate('AdminPage')}>
+              <Icon name="arrow-back" size={30} color={'white'}/>
+              </TouchableOpacity>
+            )          })}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
