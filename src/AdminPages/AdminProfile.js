@@ -117,7 +117,9 @@ const AdminProfile = () => {
   const NavToComm = () => {
     navigation.navigate('AdminComments');
   };
-  
+  const NavToTasks = () => {
+    navigation.navigate('TasksList');
+  };
 
   const Logout = async () => {
     try {
@@ -177,6 +179,10 @@ const AdminProfile = () => {
     <MaterialCommunityIcons name="cash" size={21} color="#00e4d4" />
     <Text style={styles.ItmText}>Pays</Text>
   </TouchableOpacity>
+  <TouchableOpacity style={styles.Itm} onPress={NavToTasks}>
+    <MaterialCommunityIcons name="cash" size={21} color="#00e4d4" />
+    <Text style={styles.ItmText}>My Tasks</Text>
+  </TouchableOpacity>
 </View>
       <View style={styles.logout}>
       <TouchableOpacity onPress={Logout}>
@@ -202,7 +208,7 @@ const styles = StyleSheet.create({
 
   cont: {
     backgroundColor: '#fff',
-    padding: 20,
+    padding: 14,
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
@@ -252,12 +258,10 @@ const styles = StyleSheet.create({
 
   section: {
     backgroundColor: '#fff',
-    marginTop: 19,
+    marginTop: 11,
     marginHorizontal: 21,
     borderRadius: 11,
-    marginBottom: 11,
     padding: 18,
-    elevation: 3,
 
   },
 

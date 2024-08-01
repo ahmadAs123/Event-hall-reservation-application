@@ -20,6 +20,14 @@ const AdminComponent = () => {
     navigation.navigate('PostHall'); 
   };
 
+  const handleAddTask = () => {
+    navigation.navigate('AdminTasks'); 
+  };
+
+  const handleAddExpense = () => {
+    navigation.navigate('Expenses'); 
+  };
+
   return (
     <View style={styles.container}>
 
@@ -31,8 +39,15 @@ const AdminComponent = () => {
       </TouchableOpacity>
 
 
-     
-      
+
+      <TouchableOpacity onPress={handleAddTask} style={styles.postHallButton}>
+        <Text style={styles.postHallButtonText}>Add Tasks</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleAddExpense} style={styles.postHallButton}>
+        <Text style={styles.postHallButtonText}>Add Expenses</Text>
+      </TouchableOpacity>
+           
     </View>
     </View>
   );
@@ -47,14 +62,24 @@ const AdminPage = () => {
   const Tab = createBottomTabNavigator();
 
   return (
-    <Tab.Navigator>
-
+    <Tab.Navigator
+    screenOptions={{
+      tabBarStyle: {
+        height: 55,
+        backgroundColor: "#00e4d0",
+      },
+      tabBarLabelStyle: {
+        color: "white",
+        fontSize: 13,
+      }
+    }}
+  >
     <Tab.Screen
           name="HomePage"
           component={AdminComponent}
           options={{
             tabBarIcon: ({ color}) => (
-              <Icon name="home" type="AntDesign" color={color} size={30} />
+              <Icon name="home" type="AntDesign" color={'white'} size={28} />
             ),
             headerShown: false,
           }}
@@ -66,7 +91,7 @@ const AdminPage = () => {
       component={AdminProfile}
       options={{
         tabBarIcon: ({ color }) => (
-          <Icon name="account-circle" type="MaterialIcons" color={color} size={30} />
+          <Icon name="account-circle" type="MaterialIcons" color={'white'} size={26} />
         ),
         headerShown: false,
       }}
@@ -80,7 +105,7 @@ const AdminPage = () => {
       component={AdminHalls}
       options={{
         tabBarIcon: ({ color}) => (
-          <FontAwesomeIcon name="archway"  color={color} size={22} />
+          <FontAwesomeIcon name="archway"  color={'white'} size={20} />
         ),
         headerShown: false,
       }}
@@ -92,7 +117,7 @@ const AdminPage = () => {
       component={AdminChat}
       options={{
         tabBarIcon: ({ color }) => (
-          <Icon name="chat" type="material" color={color} size={29} />
+          <Icon name="chat" type="material" color={'white'} size={23} />
         ),
         headerShown: false,
       }}
