@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput} from 'react-native';
+import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput,Linking } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { db } from "../config";  
 import { Picker } from '@react-native-picker/picker'; 
@@ -8,11 +8,16 @@ import { getAuth } from "firebase/auth";
 import { FontAwesome } from '@expo/vector-icons'; // 
 import { doc, getDoc, updateDoc, setDoc ,query,where} from "firebase/firestore"; 
 import { onSnapshot } from "firebase/firestore";
+import { Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { RadioButton } from 'react-native-paper';  
+import { Modal, TouchableWithoutFeedback } from 'react-native';
+
 
 
 const { width: Width, height: Height } = Dimensions.get('window');
 
-const SelectedHall = ({ navigation }) => {
+const SelectedHall = () => {
   const [hallsData, setHallsData] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [availableDates, setAvailableDates] = useState([]);
@@ -25,10 +30,72 @@ const SelectedHall = ({ navigation }) => {
   const [comment, setComment] = useState('');
   const [fname, setFname] = useState('');
   const [shiftsStatus, setShiftsStatus] = useState({});
+  const [organizingEvent, setOrganizingEvent] = useState('I know already');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [jobOffers, setJobOffers] = useState([]);
+  
   const route = useRoute();
   const HallName  = route.params;
   const scrollViewRef = useRef(null);
+  const navigation = useNavigation();  
 
+  const renderJobOffers = () => {
+    return jobOffers.map((offer, index) => (
+      <View key={index} style={styles.card}>
+        <Text style={styles.cardTitle}>{offer.title}</Text>
+        <View style={styles.infoRow}>
+          <FontAwesome name="user" size={20} color="black" style={{marginRight: 10,}} />
+          <Text style={styles.cardText}>{offer.name}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <FontAwesome name="map-marker" size={20} color="black" style={{marginRight: 10,}} />
+          <Text style={styles.cardText}>{offer.location}</Text>
+        </View>
+        <TouchableOpacity onPress={() => Linking.openURL(`tel:${offer.phone}`)}>
+          <View style={styles.infoRow}>
+            <FontAwesome name="phone" size={20} color="black" style={{left:20,marginRight:15}} />
+            <Text style={[styles.cardText, styles.phoneLink]}>{offer.phone}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    ));
+  };
+  
+  
+  const fetchJobOffers = async () => {
+    try {
+      const hallsData = [];
+      const usersQuery = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersQuery);
+  
+      usersSnapshot.forEach(doc => {
+        const userData = doc.data();
+        const userPosts = userData['posted halls'] || [];
+  
+        userPosts.forEach(post => {
+          if (post.hallName === HallName) {
+            hallsData.push({
+              jobOffers:post.jobOffers,
+              userId: post.userId,       
+              hallName: post.hallName,
+              location: post.place,
+              images: post.images || [],  
+            });
+          }
+        });
+      });
+  
+      if (hallsData.length > 0) {
+        const { jobOffers } = hallsData[0];
+        setJobOffers(jobOffers); 
+      } else {
+        console.error('No halls found matching');
+      }
+    } catch (error) {
+      console.error('Error while fetching job offers:', error);
+    }
+  };
+  
   useEffect(() => {
     const fetchData = async () => { //fetching the data from firebase database 
       try {
@@ -46,11 +113,12 @@ const SelectedHall = ({ navigation }) => {
                 id: index.toString(),
                 Capacity: post.capacity,
                 name: post.hallName,
-                location: post.place,
+                location: post.city,
                 images: post.images && post.images.length > 0 ? post.images : [], // if there is images push else make it empty 
                 type: post.type,
                 availableDates: post.selectedDates ,
-                Id :userData.userId 
+                Id :userData.userId ,
+                cost: post.costPerHour
               });
               availableDates.push(...Object.keys(post.selectedDates));
             }
@@ -67,7 +135,7 @@ const SelectedHall = ({ navigation }) => {
   }, [HallName]);
 
 // console.log(hallsData[0].Id)
-  const ImgContHeight = Height * 0.25;
+  const ImgContHeight = Height * 0.23;
   useEffect(() => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -117,7 +185,6 @@ const SelectedHall = ({ navigation }) => {
   
   
   const Reservation = async (hall) => {
-    console.log("Reservation button pressed");
     console.log("Selected Date:", selectedDate);
     console.log("Selected Shift:", selectedShift.start, '-', selectedShift.end);
     
@@ -165,13 +232,16 @@ const SelectedHall = ({ navigation }) => {
             images: hall.images,
             Name: fullName,
             status: status,
-            OwnerID:hallsData[0].Id
+            OwnerID:hallsData[0].Id,
+            Cost:parseInt(hallsData[0].cost,10)
           };
 
           try{
             await addDoc(collection(db, "reservations"), resData);
             console.log("Reservation data added to Firestore");
             setResReq(true);
+            Alert.alert("Success", "Your Reservation request has been sent!");
+            // navigation.goBack();
           } 
           catch (error) {
             console.error("Error adding reservation data to Firestore:", error);
@@ -186,8 +256,9 @@ const SelectedHall = ({ navigation }) => {
 
 
 const Rating = ({ rating, setRating }) => {
+  var n = ''
   return (
-    <View>
+    <View >
     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       {[1, 2, 3, 4, 5].map((star) => (
         <TouchableOpacity
@@ -206,9 +277,10 @@ const Rating = ({ rating, setRating }) => {
     <TextInput
         placeholder="Write Your Comment..."
         textAlignVertical="top"  
-        onChangeText={setComment}
+        onChangeText={(val)=>n = val}
+        onEndEditing={()=>setComment(n)}
         style={styles.commentInput}
-        value={comment}
+        defaultValue={comment}   
       />
     <TouchableOpacity
         style={styles.Applybutt}
@@ -224,23 +296,35 @@ const Rating = ({ rating, setRating }) => {
 
 
 
-const Submit = async (hallName,rating) => { //submit the ratevalue to the database  
+const Submit = async (hallName, rating) => { //submit the ratevalue to the database
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const uid = user.uid;
   try {
-    // console.log("the rating with parameters:");
-    // console.log("hallName is", hallName);
-    // console.log("rating is", rating);
+    // console.log("The rating with parameters:");
+    // console.log("Name is", fname);
+    // console.log("Rating is", rating);
+    const reservationsRef = collection(db, 'reservations');
+    const q = query(reservationsRef, where('userId', '==', uid), where('hallName', '==', hallName));
+    const querySnapshot = await getDocs(q);
+     if (querySnapshot.empty) {
+      Alert.alert("Error", "You must reserve the hall before submitting a rating.");
+      return;
+    }
     const ratingRef = doc(db, 'ratings', hallName);
     const ratingSnap = await getDoc(ratingRef);
 
     if (ratingSnap.exists()) {
-      const ratingData = ratingSnap.data(); // making average of the rate 
+      const ratingData = ratingSnap.data(); // making average of the rate
       const TotalRate = ratingData.totalRate + rating;
       const NumRating = ratingData.rateCount + 1;
       const AvrRating = TotalRate / NumRating;
 
       await updateDoc(ratingRef, {
-        // averageRate: AvrRating,
-        comments: [{ user: fname, text: comment }]
+        totalRate: TotalRate,
+        rateCount: NumRating,
+        averageRate: AvrRating,
+        comments: [...ratingData.comments, { user: fname, text: comment }],
       });
     } else {
       await setDoc(ratingRef, {//there is no collection its the first time
@@ -251,6 +335,7 @@ const Submit = async (hallName,rating) => { //submit the ratevalue to the databa
         comments: [{ user: fname, text: comment }]
       });
     }
+    Alert.alert("Success", "Your rating has been submitted!");
   } catch (error) {
     console.error("Error while rating:", error);
   }
@@ -361,11 +446,59 @@ const Submit = async (hallName,rating) => { //submit the ratevalue to the databa
                 </View>
               </View>
               <View style={styles.row}>
-                <Text style={styles.lbl}>Rating:</Text>
+                <Text style={styles.lbl}>Cost/Hour:</Text>
                 <View style={styles.ansCon}>
-                  <Text style={styles.answer}>4.5</Text>
+                  <Text style={styles.answer}>{hall.cost}</Text>
                 </View>
               </View>
+              <View style={styles.row}>
+            <Text style={styles.lbl}>Organize:</Text>
+            <View style={[styles.ansCon, { flexDirection: 'column' }]}>
+            <RadioButton.Group
+                onValueChange={value => {
+                  setOrganizingEvent(value);
+                  if (value === "I dont know") {
+                    setModalVisible(true);
+                    fetchJobOffers();
+                  }
+                }}
+                value={organizingEvent}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <RadioButton value="I dont know" />
+                  <Text>I don't know</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <RadioButton value="I know already" />
+                  <Text>I know already</Text>
+                </View>
+              </RadioButton.Group>
+
+            </View>
+          </View>
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                    <View style={{ flex: 1 }} />
+                  </TouchableWithoutFeedback>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Job Offers</Text>
+                    {jobOffers.length > 0 ? (
+                      <ScrollView style={{width: '100%',}}>
+                        {renderJobOffers()}
+                      </ScrollView>
+                    ) : (
+                      <Text>No job offers available</Text>
+                    )}
+                  </View>
+                </View>
+              </Modal>
+
               <View style={styles.buttCont}>
             <View style={styles.button}>
               <TouchableOpacity  onPress={() => Reservation(hall)} disabled={resReq}>
@@ -420,6 +553,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     right: -50,
+    
   },
   ansCon: {
     flex: 1,
@@ -494,7 +628,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 
-
   commentInput: {
     borderRadius: 6,
     marginHorizontal: 20,
@@ -507,7 +640,60 @@ const styles = StyleSheet.create({
     height: 122,
    
   },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+
+  },
+
+  modalContent: {
+    flex: 1,
+    margin: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 40,
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+
+  card: {
+    marginVertical: 11,
+    width: '100%',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 11,
+    
+  },
   
+  phoneLink: {
+    color: '#007aff', 
+    textDecorationLine: 'underline',
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+
+  cardText: {
+    fontSize: 17,
+    marginLeft: 11,
+  },
+ 
 });
 
 export default SelectedHall;
