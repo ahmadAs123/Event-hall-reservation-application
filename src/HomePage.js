@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView, FlatList,StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { collection, getDocs, query } from 'firebase/firestore'; 
+import { collection, getDocs, query,getDoc,doc } from 'firebase/firestore'; 
 import { db } from '../config';
 import SearchFeild from '../component/SearchFeild';
 import { Icon } from 'react-native-elements';
@@ -10,6 +10,8 @@ import ClientProfile from './ClientPages/ClientProfile';
 import ClientReservations from './ClientPages/ClientReservations';
 import ClientChat from './ClientPages/ClientChat';
 import { Entypo } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
+
 
 const types = ["All Categories", "Weddings", "Educational", "Food Hall", "Condolence Tents"];
 
@@ -18,7 +20,14 @@ const HomePageComponent = () => {
   const [loading, setLoading] = useState(false);
   const [choosenType, setChoosenType] = useState("All Categories");
   const [fetchedhalls, setFetchedHalls] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchHalls(choosenType); 
+    setRefreshing(false);
+  };
+  
   const pressbutt = (item) => {
     navigation.navigate("SelectedHall",  item.name );
 
@@ -28,26 +37,49 @@ const HomePageComponent = () => {
     fetchHalls("All Categories");
   }, []);
 
+  const fetchAverageRating = async (hallName) => {
+    try {
+      const ratingRef = doc(db, 'ratings', hallName); 
+      const docSnapshot = await getDoc(ratingRef);
+  
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        return data.averageRate ? parseFloat(data.averageRate.toFixed(1)) : 0; 
+      } else 
+        return 0; 
+    } catch (error) {
+      console.error("Error while fetching rating:", error);
+      return 0; 
+    }
+  };
+  
+
+  
   const fetchHalls = async (type) => {
     setLoading(true);
     try {
       const hallsData = [];
-      const q = query(collection(db, 'users')); 
+      const q = query(collection(db, 'users'));
       const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data(); 
+  
+      for (const doc of querySnapshot.docs) {
+        const userData = doc.data();
         const userPosts = userData['posted halls'] || [];
-        userPosts.forEach((post, index) => {
+  
+        for (const post of userPosts) {
           if (type === "All Categories" || post.type === type) {
+            const avgRating = await fetchAverageRating(post.hallName);
             hallsData.push({
-              id: index.toString(),
+              id: post.hallName, // Use hallName as id
               name: post.hallName,
-              location: post.place,
-              image: post.images && post.images.length > 0 ? post.images[0] : null
+              location: post.city,
+              image: post.images && post.images.length > 0 ? post.images[0] : null,
+              averageRating: avgRating, 
             });
           }
-        });
-      });
+        }
+      }
+  
       setFetchedHalls(hallsData);
     } catch (err) {
       console.error('Error while fetching data:', err);
@@ -55,6 +87,7 @@ const HomePageComponent = () => {
       setLoading(false);
     }
   };
+  
 
   const SelectType = (type) => {
     setChoosenType(type);
@@ -112,13 +145,19 @@ const HomePageComponent = () => {
                   <View style={styles.text}>
                     <Text style={styles.name}>{item.name}</Text>
                     <Text style={styles.loc}>{item.location}</Text>
-                  </View>
+                    <View style={styles.ratingCont}>
+                    <FontAwesome name="star" size={20} color="gold" />
+                    <Text style={styles.rateTxt}>{item.averageRating.toFixed(1)}</Text>
+                    </View>
+                  </View>  
                 </View>
               </TouchableOpacity>
             </View>
           )}
           contentContainerStyle={styles.flatListContent}
           ListEmptyComponent={<Text style={styles.noHallsText}>No halls available</Text>}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
         />
       )}
       {/* <TouchableOpacity onPress={Logout} style={styles.logoutButton}>
@@ -294,8 +333,18 @@ const styles = StyleSheet.create({
       color: 'gray',
       fontSize: 16,
     },
-  
-   
+
+    rateTxt: {
+      color: 'gray',
+      marginLeft: 6,
+      fontSize: 17,
+    },
+
+    ratingCont: {
+      flexDirection: 'row',
+      top:4,
+      alignItems: 'center',
+    },
   
     name: {
       fontWeight: 'bold',
