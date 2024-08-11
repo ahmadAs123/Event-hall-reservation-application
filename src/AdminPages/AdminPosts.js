@@ -34,7 +34,6 @@ const AdminPosts = () => {
 
 
   const DeletePress = async (hall) => {
-      // console.log("im here")
     try {
       Alert.alert(
         'Deleting Hall', `Are you sure you want to delete "${hall.hallName}"?`,
@@ -43,29 +42,38 @@ const AdminPosts = () => {
           {
             text: 'Delete',
             style: 'destructive',
-            onPress: async () => { // Deleting hall from the list 
-              const hallRef = doc(db, 'Halls', hall.id);
-              await deleteDoc(hallRef);
-              const userQuery = query(collection(db, 'users'), where('userId', '==', currentUser.uid)); // delete  hall from  posted halls
+            onPress: async () => {
+              const userQuery = query(collection(db, 'users'), where('userId', '==', currentUser.uid));
               const userSnapshot = await getDocs(userQuery);
-              if (!userSnapshot.empty) { //if not empty 
+  
+              if (!userSnapshot.empty) {
                 const userDoc = userSnapshot.docs[0];
                 const userData = userDoc.data();
-                const updatedHalls = userData.postedHalls.filter((h) => h.id !== hall.id);
-                await updateDoc(userDoc.ref, { postedHalls: updatedHalls });
-                setPosts(updatedHalls);
+                const Halls = userData['posted halls'];
+  
+                if (Halls && Array.isArray(Halls)) {
+                  // Filter out the specific hall by matching hallName
+                  const updatedHalls = Halls.filter((h) => h.hallName !== hall.hallName);
+  
+                  // Update the posted halls in Firestore
+                  await updateDoc(userDoc.ref, { 'posted halls': updatedHalls });
+  
+                  // Update the local state
+                  setPosts(updatedHalls);
+                } else {
+                  console.error('posted halls is not defined or not an array');
+                }
               }
             },
           },
         ],
         { cancelable: false }
       );
-
     } catch (error) {
       console.error('Error while deleting hall:', error);
     }
   };
-
+  
 
 
   const EditPress = (hall) => {
