@@ -6,6 +6,9 @@ import { SearchBar, Icon } from 'react-native-elements';
 import LoadingPage from './LoadingPage';
 import Modal from 'react-native-modal';
 import { IconButton, Divider, Button, Checkbox } from 'react-native-paper';
+import { Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 const SearchField = () => {
   const [focused, setFocused] = useState(false);
@@ -145,12 +148,13 @@ const styles = StyleSheet.create({
     bottom: 11,
     backgroundColor:"#00e4d4",
     height:69,
+    width: width,  
   },
   inputText: {
     color: 'black',
   },
   iconContainer: {
-    right: 10,
+    right:-5,
     top: -36,
     marginLeft: 363,
     width: 30,
@@ -164,11 +168,11 @@ const styles = StyleSheet.create({
   Filltericon: {
     marginLeft: 352,
     top: -66,
-    right: 40
+    right: 30
   },
   input: {
-    width: 340,
-    height: 42,
+    width: 350,
+    height: 43,
     borderRadius: 20,
     borderWidth: 2,
     backgroundColor: 'white',
