@@ -33,11 +33,54 @@ const SelectedHall = () => {
   const [organizingEvent, setOrganizingEvent] = useState('I know already');
   const [modalVisible, setModalVisible] = useState(false);
   const [jobOffers, setJobOffers] = useState([]);
-  
+  const [comments, setComments] = useState([]);
+  const [commModVisible, setCommModVisible] = useState(false);
+  const [fullImage, setFullImage] = useState(false);
+  const [selImage, setSelImage] = useState('');
+
   const route = useRoute();
   const HallName  = route.params;
   const scrollViewRef = useRef(null);
   const navigation = useNavigation();  
+
+
+  const ImageClick = (imageUrl) => {
+    setSelImage(imageUrl);
+    setFullImage(true);
+  };
+
+
+  const renderFullImg= () => (
+    <Modal
+      visible={fullImage}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={() => setFullImage(false)}
+    >
+
+      <TouchableWithoutFeedback onPress={() => setFullImage(false)}>
+        <View style={styles.fullScrMod}>
+          <Image source={{ uri: selImage }} style={styles.fullScrImg} />
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+
+  const fetchComments = async (hallName) => { //fetching commemnts for specific hall
+    try {
+      const ratingRef = doc(db, 'ratings', hallName);
+      const ratingSnap = await getDoc(ratingRef);
+      if (ratingSnap.exists()) {
+        const ratingData = ratingSnap.data();
+        setComments(ratingData.comments || []);
+        setCommModVisible(true);
+      } else {
+        console.log('No comments found !');
+      }
+    } catch (error) {
+      console.error('Error while fetching comments:', error);
+    }
+  };
 
   const renderJobOffers = () => {
     return jobOffers.map((offer, index) => (
@@ -282,6 +325,44 @@ const Rating = ({ rating, setRating }) => {
         style={styles.commentInput}
         defaultValue={comment}   
       />
+      <TouchableOpacity
+  style={styles.CommentsButton}
+  onPress={() => fetchComments(HallName)}>
+  <FontAwesome name="comment" size={21} color="white" />
+  <Text style={styles.ButtCommentsText}> Comments</Text>
+</TouchableOpacity>
+
+<Modal
+  visible={commModVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setCommModVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Comments</Text>
+      {comments.length > 0 ? (
+        <ScrollView>
+          {comments.map((comment, index) => (
+            <View key={index} style={styles.commentItem}>
+              <Text style={{fontWeight: 'bold'}}>{comment.user}</Text>
+              <Text style={{marginTop: 5}}>{comment.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      ) : (
+        <Text>No comments available !</Text>
+      )}
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => setCommModVisible(false)}
+      >
+        <Text style={styles.closeText}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
     <TouchableOpacity
         style={styles.Applybutt}
         onPress={() => Submit(HallName, rating)}
@@ -348,13 +429,17 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
         <ScrollView horizontal pagingEnabled ref={scrollViewRef}>
           {hallsData.map((hall) => (  //for scrolling the fetched images
             hall.images.map((img, index) => (
+            <TouchableOpacity key={index} onPress={() => ImageClick(img)}>
               <Image
                 key={index} source={{ uri: img }} style={{ width: Width, height: '100%' }}
               />
+            </TouchableOpacity>
             ))
          ))}
         </ScrollView>
       </View>
+      
+      {renderFullImg()}
 
       {hallsData.map((hall) => (
         <View key={hall.id} style={{ padding: 20 }}>
@@ -439,12 +524,7 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
                   <Text style={styles.answer}>{hall.Capacity}</Text>
                 </View>
               </View>
-              <View style={styles.row}>
-                <Text style={styles.lbl}>Parking:</Text>
-                <View style={styles.ansCon}>
-                  <Text style={styles.answer}>Yes</Text>
-                </View>
-              </View>
+      
               <View style={styles.row}>
                 <Text style={styles.lbl}>Cost/Hour:</Text>
                 <View style={styles.ansCon}>
@@ -693,6 +773,80 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginLeft: 11,
   },
+
+  CommentsButton: {
+    flexDirection: 'row',
+    borderRadius: 51,
+    justifyContent: 'center',
+    top:41,
+    alignItems: 'center',
+    backgroundColor: '#007aff',
+    padding: 11,
+  },
+
+  ButtCommentsText: {
+    fontSize: 17,
+    color: 'white',
+    marginLeft: 5,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+
+  closeText: {
+    color: 'white',
+    fontSize: 17,
+  },
+
+  fullScrMod: {
+    justifyContent: 'center',
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    alignItems: 'center',
+  },
+
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%', 
+    minHeight: '50%', 
+  },
+  
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  commentItem: {
+    backgroundColor: '#f9f9f9',
+    marginBottom: 11,
+    padding: 15,
+    borderRadius: 11,
+  },
+
+  closeButton: {
+    backgroundColor: '#007aff',
+    marginTop: 10,
+    padding: 11,
+    borderRadius: 51,
+    alignItems: 'center',
+
+  },
+
+
+  fullScrImg: {
+    width: '100%',
+    resizeMode: 'contain',
+    height: '100%',
+   
+  },
+  
  
 });
 
