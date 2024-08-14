@@ -1,6 +1,5 @@
 {
   "expo": {
-  
     "name": "Auth",
     "slug": "Auth",
     "version": "1.0.0",
@@ -16,16 +15,20 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ahmad2001322.Auth"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ahmad2001322.Auth"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+   
+    "extra": {
+      "eas": {
+        "projectId": "de385127-3aa3-4a24-84a3-2b6ddd282bc0"
+      }
     }
   }
 }
