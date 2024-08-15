@@ -98,29 +98,29 @@ const PostHall = ({ navigation }) => {
   };
 
 
-  const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${text}`);
-      const data = await response.json();
-      setSuggestions(data);
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-    }
-  };
+  // const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
+  //   try {
+  //     const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${text}`);
+  //     const data = await response.json();
+  //     setSuggestions(data);
+  //   } catch (error) {
+  //     console.error('Error fetching suggestions:', error);
+  //   }
+  // };
 
-  useEffect(() => { // make sure that place isnt null then to fetch
-    let timeoutId;
-    if (place.trim() !== '') {
-      timeoutId = setTimeout(() => {
-        fetchSuggestions(place);
-      }, 1000); 
-    }
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [place]);
+  // useEffect(() => { // make sure that place isnt null then to fetch
+  //   let timeoutId;
+  //   if (place.trim() !== '') {
+  //     timeoutId = setTimeout(() => {
+  //       fetchSuggestions(place);
+  //     }, 1000); 
+  //   }
+  //   return () => {
+  //     if (timeoutId) {
+  //       clearTimeout(timeoutId);
+  //     }
+  //   };
+  // }, [place]);
   
 
   useEffect(() => { //requesting to access to location 
@@ -144,6 +144,11 @@ const PostHall = ({ navigation }) => {
   
 
   const handleCurrentLocationPress = async () => { //save the location then get the suggestions 
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access location was denied');
+      return;
+    }
     let location = await Location.getCurrentPositionAsync({});
     const { latitude, longitude } = location.coords;
     setPlace(`${latitude},${longitude}`);
@@ -360,7 +365,7 @@ const PostHall = ({ navigation }) => {
           value={place}
           onChangeText={text => {
             setPlace(text);
-            fetchSuggestions(text);
+            // fetchSuggestions(text);
           }}
         />
   <ScrollView style={styles.suggestionsCon}>
