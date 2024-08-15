@@ -22,7 +22,13 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ahmad2001322.Auth"
+      
+      "package": "com.ahmad2001322.Auth",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBGWn55gEQDaNM78WI9brE_RXcBpxdmUFw"
+        }
+      }
     },
    
     "extra": {
