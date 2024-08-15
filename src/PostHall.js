@@ -181,22 +181,26 @@ const PostHall = ({ navigation }) => {
   };
 
   
-  const pickImg = async () => { // pick image from the gallary phone
+  const pickImg = async () => {
     try {
-
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+        return;
+      }
+  
       if (image.length >= 4) {
         alert('You can only select up to 4 images.');
         return;
       }
-
+  
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         multiple: true,
-        aspect: [4, 3],
         quality: 1,
       });
-
+  
       if (!result.canceled) {
         const ImageURLs = [];
         for (const asset of result.assets) {
@@ -204,20 +208,26 @@ const PostHall = ({ navigation }) => {
             alert('You can only select up to 4 images.');
             break;
           }
+  
+          console.log('Asset URI:', asset.uri); // Debug logging
           const response = await fetch(asset.uri);
           const blob = await response.blob();
           const filename = asset.uri.substring(asset.uri.lastIndexOf('/') + 1);
-          const storageRef = ref(storage, filename);
+          console.log('Filename:', filename); // Debug logging
+          const storageRef = ref(storage, `images/${filename}`);
+          console.log(storageRef)
           await uploadBytes(storageRef, blob);
           const URL = await getDownloadURL(storageRef);
           ImageURLs.push(URL);
         }
+  
         setImage(prevImages => [...prevImages, ...ImageURLs]);
       }
     } catch (error) {
       console.error('Error picking image:', error);
     }
   };
+  
 
   const deleteImg = (i) => { // deleting img from the stack 
     setImage(prevImages => prevImages.filter((_, index) => index !== i));
