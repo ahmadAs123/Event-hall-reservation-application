@@ -98,77 +98,72 @@ const PostHall = ({ navigation }) => {
   };
 
 
-  // const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
-  //   try {
-  //     const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${text}`);
-  //     const data = await response.json();
-  //     setSuggestions(data);
-  //   } catch (error) {
-  //     console.error('Error fetching suggestions:', error);
-  //   }
-  // };
+  const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${text}`);
+      const data = await response.json();
+      setSuggestions(data);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
 
-  // useEffect(() => { // make sure that place isnt null then to fetch
-  //   let timeoutId;
-  //   if (place.trim() !== '') {
-  //     timeoutId = setTimeout(() => {
-  //       fetchSuggestions(place);
-  //     }, 1000); 
-  //   }
-  //   return () => {
-  //     if (timeoutId) {
-  //       clearTimeout(timeoutId);
-  //     }
-  //   };
-  // }, [place]);
+  useEffect(() => { // make sure that place isnt null then to fetch
+    let timeoutId;
+    if (place.trim() !== '') {
+      timeoutId = setTimeout(() => {
+        fetchSuggestions(place);
+      }, 1000); 
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [place]);
   
 
-  // useEffect(() => { //requesting to access to location 
-  //   (async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       alert('Permission to access location was denied');
-  //       return;
-  //     }
+  useEffect(() => { //requesting to access to location 
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access location was denied');
+        return;
+      }
       
-  //     let location = await Location.getCurrentPositionAsync({});
-  //     const { latitude, longitude } = location.coords;
-  //     setMapRegion({
-  //       latitude: latitude,
-  //       longitude: longitude,
-  //       latitudeDelta: 0.0922,
-  //       longitudeDelta: 0.0421,
-  //     });
-  //   })();
-  // }, []);
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      setMapRegion({
+        latitude: latitude,
+        longitude: longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
+  }, []);
   
 
-  // const handleCurrentLocationPress = async () => { //save the location then get the suggestions 
-  //   let { status } = await Location.requestForegroundPermissionsAsync();
-  //   if (status !== 'granted') {
-  //     alert('Permission to access location was denied');
-  //     return;
-  //   }
-  //   let location = await Location.getCurrentPositionAsync({});
-  //   const { latitude, longitude } = location.coords;
-  //   setPlace(`${latitude},${longitude}`);
-  //   setSuggestions([]); 
-  //   setMapRegion({
-  //     latitude: latitude,
-  //     longitude: longitude,
-  //     latitudeDelta: 0.0922,
-  //     longitudeDelta: 0.0421,
-  //   });
-  // };
+  const handleCurrentLocationPress = async () => { //save the location then get the suggestions 
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+    setPlace(`${latitude},${longitude}`);
+    setSuggestions([]); 
+    setMapRegion({
+      latitude: latitude,
+      longitude: longitude,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    });
+  };
   
 
 
-  // const handleMapPress = (event) => { //getting location by map picker
-  //   const { latitude, longitude } = event.nativeEvent.coordinate;
-  //   setPlace(`${latitude},${longitude}`);
-  //   setSuggestions([]); 
-  //   setShowMap(false);
-  // };
+  const handleMapPress = (event) => { //getting location by map picker
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setPlace(`${latitude},${longitude}`);
+    setSuggestions([]); 
+    setShowMap(false);
+  };
 
   const addJobOfferRow = () => { //adding new job offer
     setJobOffers([...jobOffers, { title: '', name: '', location: '', cost: '', phone: '' }]);
@@ -365,7 +360,7 @@ const PostHall = ({ navigation }) => {
           value={place}
           onChangeText={text => {
             setPlace(text);
-            // fetchSuggestions(text);
+            fetchSuggestions(text);
           }}
         />
   <ScrollView style={styles.suggestionsCon}>
@@ -386,7 +381,7 @@ const PostHall = ({ navigation }) => {
         <Feather name= "map"  size={22} color="#000" style={{  right:60 , top:-8}} />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={null}>
+      <TouchableOpacity onPress={handleCurrentLocationPress}>
         <Feather name ='map-pin' size={22} color="#000" style={{ right: 48 ,top:-8}} />
       </TouchableOpacity>
       </View>
@@ -401,7 +396,7 @@ const PostHall = ({ navigation }) => {
       region={mapRegion}
       showsMyLocationButton={true}
       showsUserLocation={true} 
-      // onPress={handleMapPress}
+      onPress={handleMapPress}
     >
       {place && !isNaN(parseFloat(place.split(',')[0])) && !isNaN(parseFloat(place.split(',')[1])) && (
         <Marker 
