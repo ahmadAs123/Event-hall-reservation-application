@@ -5,6 +5,7 @@ import { db } from '../../config';
 import { FontAwesome ,MaterialIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { getAuth } from "firebase/auth";
 
 
 const AdminPays = () => {
@@ -19,29 +20,50 @@ const AdminPays = () => {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const userId = user.uid;
+    
         const startOfMonth = format(new Date(selectedYear, selectedMonth, 1), 'yyyy-MM-dd');
         const endOfMonth = format(new Date(selectedYear, selectedMonth + 1, 0), 'yyyy-MM-dd');
-        // Fetch the reservations from db and calc the cost incom
+    
+        // Fetch the reservations for the current user
         const reservationsCollection = collection(db, 'reservations');
-        const reservationsQuery = query(reservationsCollection, where('date', '>=', startOfMonth), where('date', '<=', endOfMonth));
-        const reservationsSnapshot = await getDocs(reservationsQuery);
+        const ownerQuery = query(reservationsCollection, where('OwnerID', '==', userId));
+        const ownerSnapshot = await getDocs(ownerQuery);
+    
         let IncomeCalc = 0;
         let totalRes = 0;
-        const reservationsData = reservationsSnapshot.docs.map(doc => {
+    
+        if (ownerSnapshot.empty) {
+          setTotalIncome(0);
+          setTotalReservations(0);
+          return;
+        }
+    
+        // Filter reservations by date range locally
+        const reservationsData = ownerSnapshot.docs
+        .map(doc => {
           const data = doc.data();
-          const [start, end] = data.shift.split(' - ');
-          const startHour = parseInt(start.split(':')[0], 10);
-          const endHour = parseInt(end.split(':')[0], 10);
-          const totalCost = (endHour - startHour) * data.Cost;
-          IncomeCalc += totalCost;
-          totalRes += 1;
-          return {
-            ...data,
-            totalCost,
-            id: doc.id
-          };
-        });
-  
+          // Check if the reservation date is within the selected range and the status is 'accepted'
+          if (data.date >= startOfMonth && data.date <= endOfMonth && data.status === 'accepted') {
+            const [start, end] = data.shift.split(' - ');
+            const startHour = parseInt(start.split(':')[0], 10);
+            const endHour = parseInt(end.split(':')[0], 10);
+            const totalCost = (endHour - startHour) * data.Cost;
+            IncomeCalc += totalCost;
+            totalRes += 1;
+            return {
+              ...data,
+              totalCost,
+              id: doc.id
+            };
+          }
+          return null;
+        })
+        .filter(Boolean); // Remove null values from the array
+       // Remove null values from the array
+    
         // Fetch all the expenses from db
         const expensesCollection = collection(db, 'expenses');
         const expensesSnapshot = await getDocs(expensesCollection);
@@ -50,11 +72,13 @@ const AdminPays = () => {
           const data = doc.data();
           const hallExpenses = data.expenses || [];
           hallExpenses.forEach(expense => {
-            if (expense.date >= startOfMonth && expense.date <= endOfMonth) { //if the selected date are in the range 
+            if (expense.date >= startOfMonth && expense.date <= endOfMonth) { // Check if the selected date is in the range 
               totalExp += parseFloat(expense.amount);
             }
           });
         });
+    
+        // Update state with the fetched data
         setReservations(reservationsData);
         setTotalExpenses(totalExp);
         setTotalIncome(IncomeCalc);
@@ -63,10 +87,10 @@ const AdminPays = () => {
         console.error('Error while fetching data:', error);
       }
     };
+    
     fetchExpenses();
   }, [selectedMonth, selectedYear]);
   
-
 
   return (
     <ScrollView style={styles.cont}>
