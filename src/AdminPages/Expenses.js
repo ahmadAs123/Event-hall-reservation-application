@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Modal, TextInput, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { db } from '../../config';
+import { db } from '../../config'; 
 import { collection, getDoc, getDocs, updateDoc, doc, setDoc, arrayUnion } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const ExpenseCard = ({ expense }) => (
   <View style={styles.expenseCard}>
@@ -23,15 +24,19 @@ const Expenses = () => {
   const [filterDate, setFilterDate] = useState(new Date());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newExpense, setNewExpense] = useState({ text: '', amount: '', date: '', hall: '', hallColor: '#fff' });
-
+  
+  const auth = getAuth();
+  const currentUser = auth.currentUser ? auth.currentUser.uid : null;
 
   useEffect(() => {
     const fetchExpenses = async () => { //fetching expenses 
       try {
         const expensesSnapshot = await getDocs(collection(db, 'expenses'));
-        const expensesData = [];
+        const expensesData = []; 
         expensesSnapshot.forEach(doc => {
-          expensesData.push(...doc.data().expenses);
+          const allExpenses = doc.data().expenses || [];
+          const filteredExpenses = allExpenses.filter(expense => expense.OwnerId === currentUser);
+          expensesData.push(...filteredExpenses);
         });
         setExpenses(expensesData);
       } catch (error) {
@@ -39,38 +44,38 @@ const Expenses = () => {
       }
     };
     fetchExpenses();
-  }, []);
+  }, [currentUser]);
 
-  const AddExpense = async () => { //for checking feilds
-    if ( !newExpense.text || !newExpense.amount || !newExpense.date ||!newExpense.hall) {
+  const AddExpense = async () => {//for checking feilds
+    if (!newExpense.text || !newExpense.amount || !newExpense.date || !newExpense.hall) {
       Alert.alert('Error', 'Please fill out all fields');
       return;
     }
 
     const hallDocRef = doc(db, 'expenses', newExpense.hall);
+    const expenseWithOwnerId = { ...newExpense, OwnerId: currentUser };
 
     try {
       const docSnapshot = await getDoc(hallDocRef);
+
       if (docSnapshot.exists()) { //add if exsist to same 
         await updateDoc(hallDocRef, {
-          expenses: arrayUnion(newExpense)
+          expenses: arrayUnion(expenseWithOwnerId)
         });
-      } else { //create new one
+      } else {
         await setDoc(hallDocRef, {
-          expenses: [newExpense]
+          expenses: [expenseWithOwnerId]
         });
       }
-      setExpenses([...expenses, newExpense]);
+      setExpenses([...expenses, expenseWithOwnerId]);
       setIsModalVisible(false);
       setNewExpense({ text: '', amount: '', date: '', hall: '', hallColor: '#fff' });
-
-    
     } catch (error) {
       console.error("Error while adding expense: ", error);
     }
   };
 
-  const filterExpensesByDate = () => { //fillter the result that fetched acc picked date value
+  const filterExpensesByDate = () => {
     return expenses.filter(expense =>
       new Date(expense.date).getMonth() === filterDate.getMonth() &&
       new Date(expense.date).getFullYear() === filterDate.getFullYear()
@@ -233,7 +238,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     backgroundColor: '#fff',
-   
   },
   expenseDate: {
     color: '#888',
@@ -267,40 +271,32 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
     width: '80%',
-    maxWidth: 400,
   },
   modalTitle: {
-    marginBottom: 20,
-    fontSize: 24,
+    fontSize: 23,
+    fontWeight: 'bold',
+    marginBottom: 17,
   },
   noExpensesTxt: {
-    fontSize: 18,
     textAlign: 'center',
+    marginTop: 20,
+    fontSize: 18,
     color: '#666',
   },
   saveButton: {
-    alignItems: 'center',
     backgroundColor: '#00e4d0',
-    padding: 15,
-    borderRadius: 10,
-  },
-  saveButtonText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#fff',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-
-  titleContainer: {
-    marginBottom: 10,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#e0f7fa', 
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
 });
 
