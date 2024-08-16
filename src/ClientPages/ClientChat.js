@@ -12,60 +12,83 @@ const ClientChat = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigation = useNavigation();
   const currentUser = getAuth().currentUser;
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchChatsWithLastMessage = async () => {
+
+ 
+    const fetchChatsWithLastMessage = async (isRefreshing = false) => {
+      if (!isRefreshing) {
+        setLoading(true);
+      }
       try {
         const chatsArray = [];
         const chatsRef = collection(db, 'HallsMessages');
         const chatsSnapshot = await getDocs(chatsRef);
-
+  
         for (const doc of chatsSnapshot.docs) {
           const messagesRef = collection(db, `HallsMessages/${doc.id}/messages`);
-          const q = query(messagesRef, orderBy('createdAt', 'desc'));
-          const messagesSnapshot = await getDocs(q);
-
-          let lastMessageUserName = 'No messages';
+          const messagesQuery = query(messagesRef, orderBy('createdAt', 'desc'));
+          const messagesSnapshot = await getDocs(messagesQuery);
+  
+          let lastMessageUserName = '';
           let imageURL = '';
-
+  
           if (!messagesSnapshot.empty) {
             for (const messageDoc of messagesSnapshot.docs) {
               const messageData = messageDoc.data();
-              // Fetch user image URL from the users collection and the Ownerid exist in one of the chats doc
-              if (messageData.user && messageData.user.OwnerID) {
-                const OwnerId = messageData.user.OwnerID;
+              const user = messageData.user;
+  
+              // Check if the user's _id matches the current user's uid
+              if (user._id === currentUser.uid && user.OwnerID) {
+                console.log ("the user id" + user._id)      
+                // Fetch user image URL from the users collection if the OwnerID exists in one of the chat messages
+                const OwnerId = user.OwnerID;
                 const userQuery = query(collection(db, 'users'), where('userId', '==', OwnerId));
                 const userQuerySnapshot = await getDocs(userQuery);
-
+    
                 if (!userQuerySnapshot.empty) {
-                  const userData = userQuerySnapshot.docs[0].data(); 
+                  const userData = userQuerySnapshot.docs[0].data();
                   imageURL = userData.imageURL || ''; // Get the user's image URL
                   lastMessageUserName = userData.firstName + " " + userData.lastName; // Get the user's full name
                 }
+                chatsArray.push({
+                  _id: doc.id,
+                  name: doc.id,
+                  lastUser: lastMessageUserName,
+                  imageURL: imageURL,
+                });
                 break;
               }
             }
           }
-
-          chatsArray.push({
-            _id: doc.id,
-            name: doc.id,
-            lastUser: lastMessageUserName,
-            imageURL: imageURL, 
-          });
+  
+         
         }
+  
         setChats(chatsArray);
         setFilteredChats(chatsArray);
-        setLoading(false);
       } catch (error) {
         console.log('Error fetching chats:', error);
-        setLoading(false);
+      }
+      finally {
+        if (!isRefreshing) {
+          setLoading(false);
+        }
+        setRefreshing(false);
       }
     };
+  
+    useEffect(() => {
+      fetchChatsWithLastMessage();
+    }, [currentUser.uid]);
 
-    fetchChatsWithLastMessage();
-  }, [currentUser.uid]);
+  
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchChatsWithLastMessage(true);
+  };
 
+  
   useEffect(() => {
     const filtered = chats.filter(chat =>
       chat.lastUser.toLowerCase().includes(searchTerm.toLowerCase())
@@ -102,11 +125,13 @@ const ClientChat = () => {
                 />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.userName}>{item.lastUser}</Text>
-                  <Text style={styles.hallName}>{item.name + " Hall Owner"}</Text>
+                  <Text style={styles.hallName}>{item.name.split('_')[0] + " Hall Owner"}</Text>
                 </View>
               </View>
             </TouchableOpacity>
           )}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       )}
     </View>

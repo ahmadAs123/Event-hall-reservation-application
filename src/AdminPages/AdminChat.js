@@ -38,6 +38,7 @@ const AdminChat = () => {
           for (const messageDoc of messagesSnapshot.docs) {  // Find the  user who is not the current user and chat with admin
             const messData = messageDoc.data();
             if (messData.user?._id !== currentUser.uid) {
+              console.log(messData.user?.name)
               lastNuser = messData.user?.name;
               const userQuery = query(collection(db, 'users'), where('userId', '==', messData.user?._id)); // Fetching image URL 
               const userQuerySnapshot = await getDocs(userQuery);
@@ -103,7 +104,7 @@ const AdminChat = () => {
           style: 'destructive',
         },
       ],
-      { cancelable: true }
+      { cancelable: true } 
     );
   };
 
@@ -129,7 +130,7 @@ const AdminChat = () => {
               />
               <View style={{ flex: 1 }}>
                 <Text style={styles.userName}>{item.lastUser}</Text>
-                <Text style={styles.hallName}>{item.name}</Text>
+                <Text style={styles.hallName}>{item.name.split('_')[0]}</Text>
               </View>
               <TouchableOpacity onPress={() => DeleteMess(item._id)}>
                 <Icon name="more-vert" size={24} color="black" />

@@ -22,7 +22,7 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false); 
   const[phone ,setPhone]= useState('')
   const[password ,setPassword]= useState('')
-
+  
   const PasswordVis= () => {
     setShowPass(!showPass);
   };
@@ -53,6 +53,7 @@ const SignUp = () => {
         phone: phone,
         email: email,
         type: Type,
+        points:50
       });
      alert("you singup succefully!  ")
      navigation.navigate('Login');

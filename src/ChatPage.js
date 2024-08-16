@@ -15,14 +15,16 @@ const ChatPage = () => { //chat of the button chat in reservation page
   const [userData, setUserData] = useState({ imageUrl:null, fullName: '' });
   const [messages, setMessages] = useState([]);
   const { hallName, OwnerId } = route.params;
+  const [currentUserData, setCurrentUserData] = useState({ fullName: '' }); // State for current user data
+
 
   useEffect(() => {// Fetching image and name of the Owner
     const OwnerData = async () => {
       try {
         const userQuery = query(collection(db, 'users'), where('userId', '==', OwnerId));
         const userQuerySnapshot = await getDocs(userQuery);
-          const userData = userQuerySnapshot.docs[0].data();
-          const { firstName, lastName, imageURL } = userData;
+          const userD = userQuerySnapshot.docs[0].data();
+          const { firstName, lastName, imageURL } = userD;
           if (imageURL) { //there is image alresady in database
             setUserData({
               imageUrl: imageURL,
@@ -41,9 +43,27 @@ const ChatPage = () => { //chat of the button chat in reservation page
     OwnerData();
   }, [OwnerId]);
 
-  useEffect(() => {  // getting the chat messages from database
+  useEffect(() => {
+    // Fetching image and name of the current user
+    const fetchCurrentUserData = async () => {
+      try {
+        const currentUserQuery = query(collection(db, 'users'), where('userId', '==', currentUser.uid));
+        const currentUserQuerySnapshot = await getDocs(currentUserQuery);
+        const currentUserD = currentUserQuerySnapshot.docs[0].data();
+        const { firstName, lastName} = currentUserD;
+        setCurrentUserData({
+          fullName: `${firstName} ${lastName}`,
+        });
+      } catch (error) {
+        console.error('Error while fetching current user data:', error);
+      }
+    };
+    fetchCurrentUserData();
+  }, [currentUser.uid]);
 
-    const messagesRef = collection(db, `HallsMessages/${hallName}/messages`);
+  useEffect(() => {  // getting the chat messages from database
+    const uniqueChatId = `${hallName}_${currentUser.uid}`; // Unique ID for each user's chat session
+    const messagesRef = collection(db, `HallsMessages/${uniqueChatId}/messages`);
     const q = query(messagesRef, orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newMessages = snapshot.docs.map((doc) => {
@@ -64,14 +84,15 @@ const ChatPage = () => { //chat of the button chat in reservation page
     });
 
     return unsubscribe;
-  }, [hallName]);
+  }, [hallName ,currentUser.uid]);
 
   // function to send  messages
   const handleSend = async (newMessages = []) => {
     const { text } = newMessages[0];
-    const hDocRef = collection(db, `HallsMessages/${hallName}/messages`);
+    const uniqueChatId = `${hallName}_${currentUser.uid}`; // Unique ID for each user's chat session
+    const hDocRef = collection(db, `HallsMessages/${uniqueChatId}/messages`);
     try {
-      let userName = userData.fullName;
+      let userName = currentUserData.fullName;
       await addDoc(hDocRef, {
         text,
         createdAt: new Date(),
@@ -86,7 +107,7 @@ const ChatPage = () => { //chat of the button chat in reservation page
       });
       
       //  add dummy field if notadded
-      const hallDocRef = doc(db, 'HallsMessages', hallName);
+      const hallDocRef = doc(db, 'HallsMessages', uniqueChatId);
       await setDoc(hallDocRef, { dummy: true }, { merge: true });
 
     } catch (error) {
