@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, TextInput, RefreshControl, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, TextInput, RefreshControl, Alert,ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query, orderBy, where, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../config';
@@ -12,6 +12,7 @@ const AdminChat = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
   const auth = getAuth();
   const currentUser = auth.currentUser;
 // Navigating to ChatDetails with params
@@ -19,7 +20,10 @@ const AdminChat = () => {
     navigation.navigate('ChatDetails', { user: hall, role: 'admin', image: hall.imageURL });
   };
 
-  const fetchHallsWithLastMessage = async () => {
+  const fetchHallsWithLastMessage = async (isRefreshing = false) => {
+    if (!isRefreshing) {
+      setLoading(true);
+    }
     try {
       const usersArray = [];
       const hallsRef = collection(db, 'HallsMessages');
@@ -60,6 +64,12 @@ const AdminChat = () => {
       setFilteredHalls(usersArray);
     } catch (error) {
       console.log('Error while fetching users chatting:', error);
+    }
+    finally {
+      if (!isRefreshing) {
+        setLoading(false);
+      }
+      setRefreshing(false);
     }
   };
 
@@ -107,6 +117,10 @@ const AdminChat = () => {
       { cancelable: true } 
     );
   };
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchHallsWithLastMessage(true);
+  };
 
   return ( //rendering the list of users using flat list
     <View style={styles.container}>
@@ -118,6 +132,9 @@ const AdminChat = () => {
           onChangeText={setSearchTerm}
         />
       </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ):(
       <FlatList
         data={filteredHalls}
         keyExtractor={(item) => item._id}
@@ -138,13 +155,10 @@ const AdminChat = () => {
             </View>
           </TouchableOpacity>
         )}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       />
+    )}
     </View>
   );
 };
