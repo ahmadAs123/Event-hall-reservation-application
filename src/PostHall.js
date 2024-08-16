@@ -99,6 +99,7 @@ const PostHall = ({ navigation }) => {
 
 
   const fetchSuggestions = async (text) => { //for fetching the suggestion from opeen street api 
+    if (text.trim() === '') return;
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${text}`);
       const data = await response.json();
@@ -108,19 +109,7 @@ const PostHall = ({ navigation }) => {
     }
   };
 
-  useEffect(() => { // make sure that place isnt null then to fetch
-    let timeoutId;
-    if (place.trim() !== '') {
-      timeoutId = setTimeout(() => {
-        fetchSuggestions(place);
-      }, 1000); 
-    }
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [place]);
+ 
   
 
   useEffect(() => { //requesting to access to location 
@@ -141,6 +130,24 @@ const PostHall = ({ navigation }) => {
       });
     })();
   }, []);
+  
+
+  const handleSelectPlace = async (place) => {
+    const selectedPlace = suggestions.find(suggestion => suggestion.display_name === place);
+    if (selectedPlace) {
+      const { lat, lon } = selectedPlace;
+  
+      
+      setPlace(`${lat},${lon}`);
+      setMapRegion({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lon),
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+      setSuggestions([]); 
+    }
+  };
   
 
   const handleCurrentLocationPress = async () => { //save the location then get the suggestions 
@@ -360,17 +367,18 @@ const PostHall = ({ navigation }) => {
           value={place}
           onChangeText={text => {
             setPlace(text);
-            fetchSuggestions(text);
+            if (text.trim() !== '') {
+              fetchSuggestions(text); 
+            } else {
+              setSuggestions([]); 
+            }
           }}
         />
   <ScrollView style={styles.suggestionsCon}>
   {suggestions.map((suggestion, index) => (
     <TouchableOpacity 
       key={index} 
-      onPress={() => {
-        setPlace(suggestion.display_name);
-        setSuggestions([]);
-      }}
+      onPress={() => handleSelectPlace(suggestion.display_name)}
     >
       <Text style={styles.suggestionText}>{suggestion.display_name}</Text>
     </TouchableOpacity>

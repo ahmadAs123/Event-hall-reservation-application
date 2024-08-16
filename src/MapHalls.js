@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../config';
@@ -32,16 +31,16 @@ const MapHalls = ({ route }) => {
         const userPosts = userData['posted halls'] || [];
         userPosts.forEach((post, index) => {
           if (post.city === searchValue) {
+            const [latitude, longitude] = post.place.split(',').map(Number);
             hallsData.push({
               id: `${doc.id}_${index}`,
               name: post.hallName,
-              location: post.place,
+              coordinates: { latitude, longitude },
             });
           }
         });
       });
-      console.log('Fetched Halls:', hallsData);
-      await convertLocToCoord(hallsData);
+      setFetchedHalls(hallsData);
     } catch (err) {
       console.error('Error while fetching data:', err);
     } finally {
@@ -49,41 +48,14 @@ const MapHalls = ({ route }) => {
     }
   };
 
-  const convertLocToCoord= async (hallsData) => {
-    const updatedHalls = await Promise.all(
-      hallsData.map(async (hall) => {
-        try {
-          const response = await axios.get('https://nominatim.openstreetmap.org/search', {
-            params: {
-              q: hall.location,
-              format: 'json',
-            },
-          });
-          if (response.data && response.data.length > 0) {
-            const { lat, lon } = response.data[0];
-            return {
-              ...hall,
-              coordinates: { latitude: parseFloat(lat), longitude: parseFloat(lon) },
-            };
-          } 
-
-        } catch (error) {
-          console.error('Error while fetching coordinates:', error);
-          return null;
-        }
-      })
-    );
-    setFetchedHalls(updatedHalls.filter(hall => hall !== null));
-  };
-
   const navigateToHall = (hallId) => {
     console.log('Navigating to hall:', hallId);
-    // must to complete here 
+    // Implement navigation logic here
   };
 
   useEffect(() => {
     if (mapRef.current && fetchedHalls.length > 0) {
-      const filteredHalls = fetchedHalls.filter(hall => hall.location.toLowerCase().includes(searchValue.toLowerCase()));
+      const filteredHalls = fetchedHalls.filter(hall => hall.name.toLowerCase().includes(searchValue.toLowerCase()));
       if (filteredHalls.length > 0) {
         const { coordinates } = filteredHalls[0];
         if (coordinates) {
@@ -123,7 +95,7 @@ const MapHalls = ({ route }) => {
             key={index}
             coordinate={hall.coordinates || { latitude: 0, longitude: 0 }}
             title={hall.name}
-            description={`Location: ${hall.location}`}
+            description={`Location: ${hall.coordinates.latitude}, ${hall.coordinates.longitude}`}
             onPress={() => navigateToHall(hall.id)}
           />
         ))}

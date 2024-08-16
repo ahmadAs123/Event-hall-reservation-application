@@ -12,6 +12,8 @@ import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RadioButton } from 'react-native-paper';  
 import { Modal, TouchableWithoutFeedback } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import axios from 'axios';  // If it's not already imported
 
 
 
@@ -32,11 +34,13 @@ const SelectedHall = () => {
   const [shiftsStatus, setShiftsStatus] = useState({});
   const [organizingEvent, setOrganizingEvent] = useState('I know already');
   const [modalVisible, setModalVisible] = useState(false);
+  const [mapVisible, setMapVisible] = useState(false);
   const [jobOffers, setJobOffers] = useState([]);
   const [comments, setComments] = useState([]);
   const [commModVisible, setCommModVisible] = useState(false);
   const [fullImage, setFullImage] = useState(false);
   const [selImage, setSelImage] = useState('');
+  const [coordinates, setCoordinates] = useState(null);
 
   const route = useRoute();
   const HallName  = route.params;
@@ -44,6 +48,32 @@ const SelectedHall = () => {
   const navigation = useNavigation();  
 
 
+  const convertLocToCoord = async (hallLocation) => {
+    try {
+      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: {
+          q: hallLocation,
+          format: 'json',
+        },
+      });
+      if (response.data && response.data.length > 0) {
+        const { lat, lon } = response.data[0];
+        setCoordinates({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
+      } else {
+        console.error('No coordinates found for this location.');
+      }
+    } catch (error) {
+      console.error('Error while fetching coordinates:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (hallsData.length > 0) {
+      console.log(hallsData[0])
+      convertLocToCoord(hallsData[0].place);
+    }
+  }, [hallsData]);
+  
   const ImageClick = (imageUrl) => {
     setSelImage(imageUrl);
     setFullImage(true);
@@ -161,7 +191,8 @@ const SelectedHall = () => {
                 type: post.type,
                 availableDates: post.selectedDates ,
                 Id :userData.userId ,
-                cost: post.costPerHour
+                cost: post.costPerHour,
+                place: post.place
               });
               availableDates.push(...Object.keys(post.selectedDates));
             }
@@ -473,9 +504,47 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
               <View style={styles.row}>
                 <Text style={styles.lbl}>Location:</Text>
                 <View style={styles.ansCon}>
-                  <Text style={styles.answer}>{hall.location}</Text>
+                  <Text style={[styles.answer ,{ flexDirection: 'row'}]}>{hall.location}
+                  <TouchableOpacity  
+                   onPress={() => setMapVisible(true)}
+                  >
+              <FontAwesome name="map" size={18} color="black" style={{ marginLeft: 10 }} />
+            </TouchableOpacity>
+                  </Text>
                 </View>
               </View>
+
+              <Modal
+              visible={mapVisible}
+              animationType="slide"
+              transparent={false}
+              onRequestClose={() => setMapVisible(false)}
+            >
+              <MapView
+                style={{ flex: 1 }}
+                initialRegion={{
+                  latitude: coordinates ? coordinates.latitude : 37.78825, // Default location if coordinates are not set
+                  longitude: coordinates ? coordinates.longitude : -122.4324,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+              >
+                {coordinates && (
+                  <Marker
+                    coordinate={coordinates}
+                    title={hallsData.length > 0 ? hallsData[0].name : 'Hall'}
+                    description={hallsData.length > 0 ? hallsData[0].location : 'Location'}
+                  />
+                )}
+              </MapView>
+              <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setMapVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+            </Modal>
+
               <View style={styles.row}>
                 <Text style={styles.lbl}>Days:</Text>
                 <View style={styles.ansCon}>
@@ -604,6 +673,7 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
           
         </View>
       ))}
+      
     </View>
   );
 };
@@ -845,6 +915,25 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     height: '100%',
    
+  },
+
+  map: {
+    flex: 1,
+  },
+
+  closeButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: '50%',
+    transform: [{ translateX: -50 }],
+    backgroundColor: '#000',
+    padding: 10,
+    borderRadius: 5,
+  },
+  
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   
  
