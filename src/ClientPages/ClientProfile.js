@@ -19,6 +19,7 @@ const ClientProfile = () => {
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
   const [id, setId] = useState('');
+  const [points, setPoints] = useState('');
 
 
   
@@ -42,6 +43,7 @@ const ClientProfile = () => {
 +           setLocation(Data.address || 'No address yet');
             setPhone(Data.phone);
             setId(Data.userId)
+            setPoints(Data.points)
             if (Data.imageURL) {
               setImage(Data.imageURL); // Set image 
             }
@@ -151,7 +153,7 @@ const ClientProfile = () => {
       <View style={styles.section}>
         <Text style={styles.T_name}></Text>
          <Text style={styles.points}>My Points</Text>
-         <Text style={styles.pointstxt}>200</Text>
+         <Text style={styles.pointstxt}>{points}</Text>
          <FontAwesome5 name="coins" size={25} color="gold" style={styles.coin} />
       </View>
       <View style={styles.logout}>

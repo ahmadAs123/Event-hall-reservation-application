@@ -14,6 +14,8 @@ import { RadioButton } from 'react-native-paper';
 import { Modal, TouchableWithoutFeedback } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import axios from 'axios';  // If it's not already imported
+import { CheckBox } from 'react-native-elements'; // If you haven't already imported it
+import Icon from 'react-native-vector-icons/Feather';
 
 
 
@@ -41,6 +43,7 @@ const SelectedHall = () => {
   const [fullImage, setFullImage] = useState(false);
   const [selImage, setSelImage] = useState('');
   const [coordinates, setCoordinates] = useState(null);
+  const [usePoints, setUsePoints] = useState(false);
 
   const route = useRoute();
   const HallName  = route.params;
@@ -276,7 +279,15 @@ const SelectedHall = () => {
           const userData = doc.data();
           firstName = userData.firstName;
           lastName = userData.lastName;
+          currentPoints = userData.points
         });
+
+
+      if (usePoints && currentPoints < 30) {
+        Alert.alert("Insufficient Points", "You do not have enough points to use this feature.");
+        return;
+      }
+
 
         const fullName = `${firstName} ${lastName}`;
         setFname(fullName);
@@ -307,12 +318,12 @@ const SelectedHall = () => {
             Name: fullName,
             status: status,
             OwnerID:hallsData[0].Id,
-            Cost:parseInt(hallsData[0].cost,10)
+            Cost:parseInt(hallsData[0].cost,10),
+            discount:usePoints
           };
 
           try{
             await addDoc(collection(db, "reservations"), resData);
-            console.log("Reservation data added to Firestore");
             setResReq(true);
             Alert.alert("Success", "Your Reservation request has been sent!");
             // navigation.goBack();
@@ -320,8 +331,30 @@ const SelectedHall = () => {
           catch (error) {
             console.error("Error adding reservation data to Firestore:", error);
           }
-          }} 
-        catch (error) {
+          }
+          if (usePoints) {
+            if (currentPoints >= 30) {
+                const newPoints = currentPoints - 20;
+
+                const updatePromises = querySnapshot.docs.map((doc) =>
+                    updateDoc(doc.ref, { points: newPoints })
+                );
+                
+                await Promise.all(updatePromises);
+                
+            } 
+        }
+        else{
+          const newPoints = currentPoints + 10;
+
+          const updatePromises = querySnapshot.docs.map((doc) =>
+              updateDoc(doc.ref, { points: newPoints })
+          );
+          
+          await Promise.all(updatePromises);
+        }
+    
+        } catch (error) {
         console.error("Error while fetching user data:", error);
       }
     }
@@ -504,13 +537,12 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
               <View style={styles.row}>
                 <Text style={styles.lbl}>Location:</Text>
                 <View style={styles.ansCon}>
-                  <Text style={[styles.answer ,{ flexDirection: 'row'}]}>{hall.location}
+                  <Text style={[styles.answer ,{top:13}]}>{hall.location} </Text>
                   <TouchableOpacity  
                    onPress={() => setMapVisible(true)}
                   >
-              <FontAwesome name="map" size={18} color="black" style={{ marginLeft: 10 }} />
+               <Icon name="map-pin" size={25} color="red" style={{left:130 ,top:-15}}  />
             </TouchableOpacity>
-                  </Text>
                 </View>
               </View>
 
@@ -600,8 +632,9 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
                   <Text style={styles.answer}>{hall.cost}</Text>
                 </View>
               </View>
+              
               <View style={styles.row}>
-            <Text style={styles.lbl}>Organize:</Text>
+            <Text style={[styles.lbl, {  marginBottom: 10 , top:-15 }]}>Organize:</Text>
             <View style={[styles.ansCon, { flexDirection: 'column' }]}>
             <RadioButton.Group
                 onValueChange={value => {
@@ -622,8 +655,17 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
                   <Text>I know already</Text>
                 </View>
               </RadioButton.Group>
-
+              
+              <View style={{ flexDirection: 'row', marginTop: 10 ,alignItems: 'center', right:105}}>
+              <CheckBox
+                checked={usePoints}
+                onPress={() => setUsePoints(!usePoints)}
+                containerStyle={{ padding: 0, margin: 0, marginRight: 10 }}
+              />
+              <Text>Use 30 points for 10% discount</Text>
             </View>
+            </View>
+            
           </View>
               <Modal
                 visible={modalVisible}
