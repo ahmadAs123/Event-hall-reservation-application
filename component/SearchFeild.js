@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   iconContainer: {
-    right:-5,
     top: -36,
     marginLeft: 363,
     width: 30,
@@ -179,7 +178,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderColor: 'white',
     top:7,
-    left:3
+    left:1
   },
   mod: {
   alignItems: 'center',

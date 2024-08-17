@@ -9,10 +9,6 @@ import { Icon } from 'react-native-elements';
 const Start = () => {
   const navigation = useNavigation();
 
-  const signInWithGoogle = async () => {
-  
-  };
-
   return (
     <View style={styles.container}>
     <View style={styles.boxcontainer}>
@@ -29,17 +25,7 @@ const Start = () => {
             color="black"
             
             /> 
-      <TouchableOpacity style={styles.button} onPress={signInWithGoogle}>
-        <Text style={styles.buttonText}>Sign in via Gmail</Text>
-      </TouchableOpacity>
-      <Icon
-            name="google" 
-            type="font-awesome"
-            size={28}
-            containerStyle={styles.iconContainer}
-            color="red"
-           
-            /> 
+     
     </View>
     </View>
 

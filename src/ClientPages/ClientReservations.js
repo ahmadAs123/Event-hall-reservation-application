@@ -44,14 +44,14 @@ const ClientReservations = () => {
       const uid = user.uid;
       const resColl = collection(db, 'reservations');
       const q = query(resColl, where('userId', '==', uid));
-      const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
-        const UserRes = querySnapshot.docs.map(doc => {
+      const unsubscribeSnapshot = onSnapshot(q, async (querySnapshot) => {
+        const UserRes = await Promise.all(querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
           const cost = data.Cost || 0;
           const isDis= data.discount
           const payment = calculatePayment(data.shift, cost, isDis);
           return { id: doc.id, OwnerId: data.OwnerID, ...data, payment };
-        });
+        }));
         setAll_Res(UserRes);
         setRefreshing(false);
       });
@@ -64,36 +64,6 @@ const ClientReservations = () => {
     }
   }, [user]);
   
-
-
- const onRefresh = () => {
-  setRefreshing(true);
-  if (user) {
-    const uid = user.uid;
-    const resColl = collection(db, 'reservations');
-    const q = query(resColl, where('userId', '==', uid));
-    const unsubscribeSnapshot = onSnapshot(q, (querySnapshot) => {
-      const UserRes = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        const cost = data.Cost || 0;
-        const isDis =data.discount;
-        const payment = calculatePayment(data.shift, cost ,isDis);
-        return { id: doc.id, OwnerId: data.OwnerID, ...data, payment };
-      });
-      setAll_Res(UserRes);
-      setRefreshing(false);
-    });
-
-    return () => {
-      unsubscribeSnapshot();
-    };
-  } else {
-    setAll_Res([]);
-  }
-}
-
-
-
 
 // function for deleting the reservation from the db and the list
 const dltRes = async (item) => {
@@ -211,12 +181,7 @@ const dltRes = async (item) => {
         data={ALL_res}
         renderItem={renderItem}
         keyExtractor={item => item.id}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
+        
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>There are no reservations</Text>

@@ -185,7 +185,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     paddingVertical:40,
-    top:20
+    top:0,
+    paddingTop: StatusBar.currentHeight || 0, // Ensure header starts below the StatusBar
   },
   headerImage: {
     width: 40,

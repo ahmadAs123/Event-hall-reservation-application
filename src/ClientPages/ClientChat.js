@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, Image, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, Image, TextInput,Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, where ,deleteDoc,doc } from 'firebase/firestore';
 import { db } from '../../config';
 import { getAuth } from 'firebase/auth';
+import { MaterialIcons } from '@expo/vector-icons'; 
 
 const ClientChat = () => {
   const [chats, setChats] = useState([]);
@@ -88,7 +89,36 @@ const ClientChat = () => {
     fetchChatsWithLastMessage(true);
   };
 
-  
+  const Deletechat = async (hallId) => {
+    try {
+      await deleteDoc(doc(db, 'HallsMessages', hallId));
+      setChats(chats.filter(chat => chat._id !== hallId));
+      setFilteredChats(filteredChats.filter(chat => chat._id !== hallId));
+    } catch (error) {
+      console.error('Error while deleting chat:', error);
+    }
+  };
+
+  const DeleteMess = (hallId) => {
+    Alert.alert(
+      'Delete Chat',
+      'Are you sure you want to delete this chat?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: () => Deletechat(hallId),
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true } 
+    );
+  };
+
+
   useEffect(() => {
     const filtered = chats.filter(chat =>
       chat.lastUser.toLowerCase().includes(searchTerm.toLowerCase())
@@ -112,6 +142,10 @@ const ClientChat = () => {
       </View>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
+      ) : filteredChats.length === 0 ? (
+        <View style={styles.noChatsContainer}>
+          <Text style={styles.noChatsText}>There are no chat messages yet</Text>
+        </View>
       ) : (
         <FlatList
           data={filteredChats}
@@ -127,6 +161,9 @@ const ClientChat = () => {
                   <Text style={styles.userName}>{item.lastUser}</Text>
                   <Text style={styles.hallName}>{item.name.split('_')[0] + " Hall Owner"}</Text>
                 </View>
+              <TouchableOpacity onPress={() => DeleteMess(item._id)} style={styles.menuButton}>
+              <MaterialIcons name="more-vert" size={24} color="black" />
+             </TouchableOpacity>
               </View>
             </TouchableOpacity>
           )}
@@ -191,6 +228,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
   },
+
+  noChatsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noChatsText: {
+    fontSize: 18,
+    color: '#888',
+  },
+  
 });
 
 export default ClientChat;
