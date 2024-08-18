@@ -12,6 +12,8 @@ const MapHalls = ({ route }) => {
   const [searchValue, setSearchValue] = useState('');
   const mapRef = useRef(null);
 
+
+  
   useEffect(() => {
     const { searchValue: newSearchValue } = route.params;
     if (newSearchValue !== searchValue) {
@@ -48,9 +50,8 @@ const MapHalls = ({ route }) => {
     }
   };
 
-  const navigateToHall = (hallId) => {
-    console.log('Navigating to hall:', hallId);
-    // Implement navigation logic here
+  const navigateToHall = (hallName) => {
+    navigation.navigate('SelectedHall',  hallName ); 
   };
 
   useEffect(() => {
@@ -96,7 +97,7 @@ const MapHalls = ({ route }) => {
             coordinate={hall.coordinates || { latitude: 0, longitude: 0 }}
             title={hall.name}
             description={`Location: ${hall.coordinates.latitude}, ${hall.coordinates.longitude}`}
-            onPress={() => navigateToHall(hall.id)}
+            onPress={() => navigateToHall(hall.name)}
           />
         ))}
       </MapView>

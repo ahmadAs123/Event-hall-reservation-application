@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, TouchableOpacity, StatusBar } from 'react-native';
+import { View, StyleSheet, Text, Image, TouchableOpacity, StatusBar ,SafeAreaView } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { auth, db } from '../config';
@@ -124,7 +124,7 @@ const ChatPage = () => { //chat of the button chat in reservation page
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 10 ,top:20}}>
           <Icon name="arrow-back" size={24} color="white" />
@@ -140,7 +140,7 @@ const ChatPage = () => { //chat of the button chat in reservation page
           _id: currentUser.uid,
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -151,10 +151,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    top:20,
     alignItems: 'center',
     height:110,
     paddingHorizontal: 10,
+    paddingTop: StatusBar.currentHeight || 0, 
+
   },
 
   headerText: {

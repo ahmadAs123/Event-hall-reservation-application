@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   logout: {
     alignItems: 'center',
     justifyContent:'center',
-    padding: 33,
+    padding: 27,
     left:11
   },
   points: {

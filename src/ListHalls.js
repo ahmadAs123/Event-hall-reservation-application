@@ -1,10 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList,ScrollView ,StyleSheet, TouchableOpacity } from 'react-native';
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { FontAwesome } from '@expo/vector-icons';
+import { collection, getDocs, query, where ,doc ,getDoc } from "firebase/firestore";
+import { FontAwesome ,Foundation } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'
 import {db} from "../config"; // Import Firestore instance
 import LoadingPage from '../component/LoadingPage';
+
+const fetchAverageRating = async (hallName) => {
+  try {
+    const ratingRef = doc(db, 'ratings', hallName);
+    const docSnapshot = await getDoc(ratingRef);
+
+    if (docSnapshot.exists()) {
+      const data = docSnapshot.data();
+      return data.averageRate ? parseFloat(data.averageRate.toFixed(1)) : 0;
+    } else {
+      return 0;
+    }
+  } catch (error) {
+    console.error("Error while fetching rating:", error);
+    return 0;
+  }
+};
+
 
 const ListItem = ({ item }) => {
 
@@ -20,11 +38,11 @@ const ListItem = ({ item }) => {
        <Image source={{ uri: item.image }} style={styles.img} />
         <View style={styles.text}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.loc}>{item.location}</Text>
+          <Text style={styles.loc}>{item.city}</Text>
           <View style={styles.ratingContainer}>
           <FontAwesome name="star" size={20} color="gold" />
-          <Text style={styles.ratingText}>4.5</Text>
-        </View>
+          <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
+          </View>
         </View>      
       </View>
     </TouchableOpacity>
@@ -44,42 +62,44 @@ const ListHalls = ({ route }) => {
 
 
   useEffect(() => {
-
-    const fetchData = async () => { //function that fetch the data from the firebase 
+    const fetchData = async () => {
       try {
         const hallsData = [];
-        const q = collection(db, 'users'); 
+        const q = collection(db, 'users');
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(doc => {
-      const userData = doc.data(); 
-    const userPosts = userData['posted halls'] || []; //get all the posted halls data
+        
+        for (const doc of querySnapshot.docs) {
+          const userData = doc.data();
+          const userPosts = userData['posted halls'] || [];
 
-     userPosts.forEach((post, index) => {      
-      if(post.city===searchValue){
-      hallsData.push({  //push all the posts data that fulfill the if statment
-        id: index.toString(),
-        name: post.hallName,
-        location: post.place,
-        image: post.images && post.images.length > 0 ? post.images[0] : null,
-        cost: post.costPerHour, 
-        capacity: post.capacity,
-        // rating: post.rating
-      });
-    }
-    });
-});
-        const sortedHallsData = applySorting(hallsData, filter ,sortOrder);
+          for (const post of userPosts) {
+            if (post.city === searchValue) {
+              const rating = await fetchAverageRating(post.hallName);  // Fetch the rating for each hall
+              
+              hallsData.push({
+                id: post.hallName,  // Use hallName as id
+                name: post.hallName,
+                location: post.place,
+                image: post.images && post.images.length > 0 ? post.images[0] : null,
+                cost: post.costPerHour,
+                capacity: post.capacity,
+                city: post.city,
+                rating: rating || 0 // Use the fetched rating or 0 if not found
+              });
+            }
+          }
+        }
 
+        const sortedHallsData = applySorting(hallsData, filter, sortOrder);
         setHallsData(sortedHallsData);
-        setLoading(false); 
-
+        setLoading(false);
       } catch (err) {
         console.error('Error while fetching data:', err);
       }
     };
 
-    fetchData(); 
-  }, [searchValue,filter ,sortOrder]); 
+    fetchData();
+  }, [searchValue, filter, sortOrder]);
 
   const applySorting = (data, filter, sortOrder) => {
     const keys = Object.keys(filter).filter(key => filter[key]);
@@ -104,23 +124,26 @@ const ListHalls = ({ route }) => {
 
 
   return (
+    <View style={{ flex: 1 }}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Search Results</Text>
+        <Foundation name="results" size={24} color="black" style={styles.resultIcon} />
 
-   
-     <View style={{ flex: 0 }}>
+      </View>
+
+      {/* Content */}
       {hallsData.length === 0 ? (
-      <Text style={styles.Empty_HallsText}>There are no halls in this area !</Text>
-       ) : (
-      
-      <FlatList 
-        data={hallsData}
-        renderItem={({ item }) => <ListItem item={item} />}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.flatListContent}
-
-      />
-    )}
+        <Text style={styles.Empty_HallsText}>There are no halls in this area!</Text>
+      ) : (
+        <FlatList
+          data={hallsData}
+          renderItem={({ item }) => <ListItem item={item} />}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.flatListContent}
+        />
+      )}
     </View>
-
   );
 };
 
@@ -158,7 +181,19 @@ const styles = StyleSheet.create({
 
  
 
- 
+  header: {
+    backgroundColor: '#f8f8f8',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    flexDirection: 'row', // Use this if you want horizontal layout
+
+  },
+  headerText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
+  
  
 text:{
   fontSize: 13,
@@ -188,7 +223,7 @@ text:{
   },
   ratingContainer: {
     flexDirection: 'row',
-    marginTop: 5,
+    marginTop: 10,
     alignItems: 'center',
   },
   
@@ -196,6 +231,10 @@ text:{
     marginLeft: 5,
     color: 'gray',
     fontSize: 16,
+  },
+  resultIcon: {
+    left:8,
+    top:6
   },
   
 });

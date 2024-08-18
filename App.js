@@ -92,13 +92,30 @@ function App() {
           options={{
             headerTitle: () => <Header name="EditProfile" />,
             headerStyle: {
-              height: 150,
+              height: 110,
               backgroundColor: '#00e4d0',
               
             },
+            
           }}
           
         />
+
+<Stack.Screen
+          name="MapHalls"  
+          component={MapHalls}
+          options={{
+            headerTitle: () => <Header name="MapHalls" />,
+            headerStyle: {
+              height: 110,
+              backgroundColor: '#00e4d0',
+              
+            },
+            headerLeft: () => null,
+          }}
+          
+        />
+
 
 <Stack.Screen
           name="Tasks"  
@@ -155,7 +172,7 @@ function App() {
         options={({ navigation }) => ({
           headerTitle: () => <Header name="EditPost" />,
           headerStyle: {
-            height: 100,
+            height: 87,
             backgroundColor: '#00e4d0',
            
           },
@@ -172,7 +189,7 @@ function App() {
           options={{
             headerTitle: () => <Header name="AdminPage" />,
             headerStyle: {
-              height: 120,
+              height: 90,
               backgroundColor: '#00e4d0',
               
             },
@@ -189,15 +206,15 @@ function App() {
           options={({ navigation }) => ({
             headerTitle: () => <Header name="OptionsPage" />,
             headerStyle: {
-              height: 100,
+              height: 90,
               backgroundColor: '#00e4d0',
              
             },
-            // headerLeft: () =>(
-            //   <TouchableOpacity onPress={() => navigation.navigate('OptionsPage')}>
-            //   <Icon name="arrow-back" size={30}/>
-            //   </TouchableOpacity>
-            // )
+            headerLeft: () =>(
+              <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
+              <Icon name="arrow-back" size={30} color={'white'}/>
+              </TouchableOpacity>
+            )
           })}
           
         />
@@ -362,7 +379,7 @@ function App() {
             options={({ navigation ,route}) => ({
               headerTitle: () => <Header name="HomePage" />,
               headerStyle: {
-                height: 100,
+                height: 90,
                 backgroundColor: '#00e4d0',
                 shadowColor: '#000',
               },

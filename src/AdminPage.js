@@ -86,6 +86,31 @@ const AdminPage = () => {
         />
 
 
+<Tab.Screen
+      name="Halls Requests"
+      component={AdminHalls}
+      options={{
+        tabBarIcon: ({ color}) => (
+          <FontAwesomeIcon name="archway"  color={'white'} size={20} />
+        ),
+        headerShown: false,
+      }}
+    />
+
+
+
+<Tab.Screen
+      name="Chat"
+      component={AdminChat}
+      options={{
+        tabBarIcon: ({ color }) => (
+          <Icon name="chat" type="material" color={'white'} size={23} />
+        ),
+        headerShown: false,
+      }}
+    />
+    
+
     <Tab.Screen
       name="Profile"
       component={AdminProfile}
@@ -100,28 +125,9 @@ const AdminPage = () => {
 
 
 
-     <Tab.Screen
-      name="Halls Requests"
-      component={AdminHalls}
-      options={{
-        tabBarIcon: ({ color}) => (
-          <FontAwesomeIcon name="archway"  color={'white'} size={20} />
-        ),
-        headerShown: false,
-      }}
-    />
+  
 
 
-    <Tab.Screen
-      name="Chat"
-      component={AdminChat}
-      options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="chat" type="material" color={'white'} size={23} />
-        ),
-        headerShown: false,
-      }}
-    />
     
   </Tab.Navigator>
   );

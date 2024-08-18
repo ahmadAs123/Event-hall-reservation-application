@@ -418,7 +418,7 @@ const Rating = ({ rating, setRating }) => {
         <Text>No comments available !</Text>
       )}
       <TouchableOpacity
-        style={styles.closeButton}
+        style={styles.closeCButton}
         onPress={() => setCommModVisible(false)}
       >
         <Text style={styles.closeText}>Close</Text>
@@ -942,12 +942,14 @@ const styles = StyleSheet.create({
     borderRadius: 11,
   },
 
-  closeButton: {
-    backgroundColor: '#007aff',
-    marginTop: 10,
-    padding: 11,
-    borderRadius: 51,
-    alignItems: 'center',
+  closeCButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: '60%',
+    transform: [{ translateX: -50 }],
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
 
   },
 
@@ -966,9 +968,9 @@ const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',
     bottom: 20,
-    left: '50%',
+    left: '56%',
     transform: [{ translateX: -50 }],
-    backgroundColor: '#000',
+    backgroundColor: 'blue',
     padding: 10,
     borderRadius: 5,
   },
