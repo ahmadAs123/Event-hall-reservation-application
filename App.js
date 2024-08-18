@@ -206,12 +206,12 @@ function App() {
           options={({ navigation }) => ({
             headerTitle: () => <Header name="OptionsPage" />,
             headerStyle: {
-              height: 90,
+              height: 73,
               backgroundColor: '#00e4d0',
              
             },
             headerLeft: () =>(
-              <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
               <Icon name="arrow-back" size={30} color={'white'}/>
               </TouchableOpacity>
             )

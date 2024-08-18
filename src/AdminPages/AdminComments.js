@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../config';
-import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator,StatusBar } from 'react-native';
 import { getAuth } from "firebase/auth";
 import { Ionicons } from '@expo/vector-icons';
 
@@ -99,6 +99,8 @@ const AdminComments = () => {
 
   return (
     <ScrollView style={styles.cont}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
+
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Comments</Text>
         <Ionicons name="chatbubble" size={27} color="#00bfa5" style={styles.icon} />     

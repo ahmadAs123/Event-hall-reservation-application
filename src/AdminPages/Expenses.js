@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Modal, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Modal, TextInput, StyleSheet, Alert ,StatusBar} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { db } from '../../config'; 
@@ -84,6 +84,7 @@ const Expenses = () => {
 
   return (
     <View style={styles.container}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <Text style={styles.title}>Expenses</Text>
       <TouchableOpacity
         onPress={() => setShowDatePicker(true)}

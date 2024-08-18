@@ -1,4 +1,4 @@
-import { View, Text , TouchableOpacity,TextInput,StyleSheet,ActivityIndicator} from 'react-native'
+import { View, Text , TouchableOpacity,TextInput,StyleSheet,ActivityIndicator,StatusBar } from 'react-native'
 import { Picker } from '@react-native-picker/picker';
 import React,{useState} from 'react'
 import { useNavigation } from '@react-navigation/native'
@@ -71,6 +71,7 @@ const SignUp = () => {
 
   return (
     <View style={styles.container}>
+    <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
     <View style={styles.boxcontainer}>
     <Text style = {{fontWeight:'bold',fontSize : 35,  textAlign: 'center'}}>SignUp</Text>
 

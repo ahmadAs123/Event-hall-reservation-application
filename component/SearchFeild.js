@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
-import { StyleSheet, Alert, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Alert, View, Text, TouchableOpacity, FlatList, Dimensions,ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import IoniconsIcon from 'react-native-vector-icons/Ionicons'; 
 import { SearchBar, Icon } from 'react-native-elements';
-import LoadingPage from './LoadingPage';
 import Modal from 'react-native-modal';
 import { IconButton, Divider, Button, Checkbox } from 'react-native-paper';
-import { Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
+
+const cities = [
+  'Jerusalem', 'Tel Aviv', 'Haifa', 'Beersheba', 'Netanya',
+  'Rishon LeZion', 'Petah Tikva', 'Ashdod', 'Holon', 'Bnei Brak',
+  'Bat Yam', 'Kfar Saba', 'Ra\'anana', 'Herzliya', 'Nahariya',
+  'Safed', 'Tiberias', 'Eilat', 'Akko (Acre)', 'Kiryat Shmona',
+  'Jaffa', 'Modi\'in-Maccabim-Re\'ut', 'Hadera', 'Or Akiva',
+  'Arad', 'Be\'er Sheva', 'Ramat Gan', 'Ramat Hasharon', 'Zichron Yaakov',
+  'Kiryat Yam', 'Kiryat Motzkin', 'Kiryat Ata', 'Yavne', 'Lod',
+  'Ramla', 'Elad', 'Givatayim', 'Giv\'at Shmuel', 'Baqa al-Gharbiyye',
+  'Tira'
+]
 
 const SearchField = () => {
   const [focused, setFocused] = useState(false);
   const [search, setSearch] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [ModVis, setModVis] = useState(false);
@@ -52,7 +64,6 @@ const SearchField = () => {
     runModal();
   };
 
-
   const select_SortOrder = (criteria) => {
     setSortOrder(prevOrder => ({
       ...prevOrder,
@@ -70,14 +81,28 @@ const SearchField = () => {
       return updatedFilters;
     });
   };
-  
- 
+
+  const handleSearchChange = (text) => {
+    setSearch(text);
+    if (text) {
+      const filteredCities = cities.filter(city => city.toLowerCase().includes(text.toLowerCase()));
+      setSuggestions(filteredCities);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSelectCity = (city) => {
+    setSearch(city);
+    setSuggestions([]);
+    setSelectedCity(city); // Optionally, use this to handle selected city
+  };
 
   return (
     <View style={styles.container}>
       <SearchBar
         placeholder="Search..."
-        onChangeText={(text) => setSearch(text)}
+        onChangeText={handleSearchChange}
         inputContainerStyle={styles.input}
         value={search}
         placeholderTextColor="gray"
@@ -103,6 +128,19 @@ const SearchField = () => {
         style={styles.Filltericon}
         onPress={runModal}
       />
+      {suggestions.length > 0 && (
+        <View style={styles.suggestionsContainer}>
+          <FlatList
+            data={suggestions}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handleSelectCity(item)} style={styles.suggestionItem}>
+                <Text style={styles.suggestionText}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
       <Modal
         isVisible={ModVis}
         onBackdropPress={runModal}
@@ -114,17 +152,18 @@ const SearchField = () => {
               <Text style={{ marginRight:1 ,fontSize:17,color:"blue", textDecorationLine: 'underline'}}>reset </Text>
             </TouchableOpacity>
           </View> 
-          <Divider style={{  marginVertical: 10,}} /> 
-          <ScrollView style={{    width: '100%'}}>
-            {Object.keys(filter).map((key) => ( // /*check box to check what was chooesd*/
+          <Divider style={{ marginVertical: 10 }} /> 
+          <ScrollView style={{ width: '100%' }}>
+            {Object.keys(filter).map((key) => (
               <View key={key} style={styles.boxCont}> 
                 <Checkbox
                   status={filter[key] ? 'checked' : 'unchecked'}
                   onPress={() => handleChange(key)}
                   color="#00e4d4"
                 />
-                <Text style={{ marginLeft: 9,fontSize: 17,}}>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+                <Text style={{ marginLeft: 9, fontSize: 17 }}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </Text>
                 <IconButton
                   icon={sortOrder[key] === 'asc' ? "sort-ascending" : "sort-descending"}
                   size={20}
@@ -133,9 +172,9 @@ const SearchField = () => {
               </View>
             ))}
           </ScrollView>
-          <Divider style={{ marginVertical: 10}} />
+          <Divider style={{ marginVertical: 10 }} />
           <Button mode="contained" onPress={closeFunc} style={styles.applyButt}> 
-            <Text style={{fontWeight:"bold",fontSize: 17 }}> close </Text>
+            <Text style={{ fontWeight:"bold", fontSize: 17 }}> close </Text>
           </Button> 
         </View>
       </Modal>
@@ -147,8 +186,9 @@ const styles = StyleSheet.create({
   container: {
     bottom: 11,
     backgroundColor:"#00e4d4",
-    height:69,
-    width: width,  
+    height: 69,
+    width: width,
+    position: 'relative',
   },
   inputText: {
     color: 'black',
@@ -177,33 +217,52 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 2,
     borderColor: 'white',
-    top:7,
-    left:1
+    top: 7,
+    left: 1
   },
   mod: {
-  alignItems: 'center',
-  justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   boxCont: {
     flexDirection: 'row',
-   alignItems: 'center',
+    alignItems: 'center',
     marginVertical: 8,
   },
   modCont: {
     backgroundColor: 'white',
-   maxHeight: '62%',
-  padding: 21,
+    maxHeight: '62%',
+    padding: 21,
     width: '82%',
-  borderRadius: 11,
+    borderRadius: 11,
   },
   modHead: {
     justifyContent: 'space-between',
-  alignItems: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
   },
   applyButt: {
-   marginTop: 13,
+    marginTop: 13,
     backgroundColor: '#00e4d8',
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: 60, 
+    left: 10,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 5, 
+    zIndex: 1000, 
+    maxHeight: 200, 
+  },
+  suggestionItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  suggestionText: {
+    fontSize: 16,
   },
 });
 

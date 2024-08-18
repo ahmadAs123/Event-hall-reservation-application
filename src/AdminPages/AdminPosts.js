@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert,StatusBar } from 'react-native';
 import { db } from '../../config';
 
 
@@ -103,6 +103,7 @@ const AdminPosts = () => {
 
   return ( // rendering the list
     <View style={styles.cont}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <FlatList
         data={posts}
         keyExtractor={(item, index) => `${item.hallName}-${index}`}

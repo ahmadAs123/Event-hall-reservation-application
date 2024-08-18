@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button, Modal, StyleSheet ,FlatList} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button, Modal, StyleSheet ,FlatList,StatusBar} from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -309,6 +309,7 @@ const EditPost = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={styles.boxcontainer}>
         <View style={{ marginTop: 18 }}></View>
         <TextInput   // the feilds of the post hall 

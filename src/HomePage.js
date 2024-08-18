@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView, FlatList,StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView, FlatList,StyleSheet ,StatusBar} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query,getDoc,doc } from 'firebase/firestore'; 
 import { db } from '../config';
@@ -108,6 +108,7 @@ const HomePageComponent = () => {
 
   return (
     <View style={{ flex: 0 }}>
+          <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={styles.TopContainer}>
         <SearchFeild />
       </View>
@@ -250,6 +251,9 @@ const styles = StyleSheet.create({
     width: 400,
     marginTop: 5,
     height: 60,
+    top: 0,
+    zIndex: 1000, 
+    backgroundColor: '#00e4d0', 
   },
   countryButton: {
     borderRadius: 100,
@@ -311,7 +315,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     margin: 4,
     top:3,
-    backgroundColor:"white"
+    backgroundColor:"white",
   },
   Container: {
     flex: 1,

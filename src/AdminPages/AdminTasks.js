@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Modal, TextInput, StyleSheet, Alert, TouchableOpacity,StatusBar } from 'react-native';
 import { getDoc, setDoc, doc } from 'firebase/firestore';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Ionicons } from '@expo/vector-icons'; 

@@ -1,4 +1,4 @@
-import { View, Text , TouchableOpacity,TextInput,StyleSheet,ActivityIndicator} from 'react-native'
+import { View, Text , TouchableOpacity,TextInput,StyleSheet,ActivityIndicator,StatusBar} from 'react-native'
 import React,{useState, useEffect} from 'react'
 import { useNavigation } from '@react-navigation/native'
 import {auth} from  '../config'
@@ -78,6 +78,7 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
+     <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
     <View style={styles.boxcontainer}>
       <Text style = {{fontWeight:'bold',fontSize :35 ,  textAlign: 'center'}}>Login</Text>
 

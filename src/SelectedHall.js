@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput,Linking } from 'react-native';
+import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput,Linking ,StatusBar} from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { db } from "../config";  
 import { Picker } from '@react-native-picker/picker'; 
@@ -489,6 +489,7 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
 
   return (
     <View style={{ flex: 1 }}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={{ height: ImgContHeight }}>
         <ScrollView horizontal pagingEnabled ref={scrollViewRef}>
           {hallsData.map((hall) => (  //for scrolling the fetched images

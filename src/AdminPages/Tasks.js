@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl ,StatusBar} from 'react-native';
 import { db, auth } from "../../config";
 import { collection, getDocs, updateDoc, doc, getDoc, query, where } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';

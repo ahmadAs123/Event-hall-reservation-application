@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity,ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity,ActivityIndicator,StatusBar  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '../config';
 import { Icon } from 'react-native-elements'
@@ -30,6 +30,7 @@ const AdminComponent = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
 
        <View style={styles.boxcontainer}>
 
@@ -109,7 +110,7 @@ const AdminPage = () => {
         headerShown: false,
       }}
     />
-    
+
 
     <Tab.Screen
       name="Profile"
@@ -164,9 +165,8 @@ const styles = {
   },
   postHallButton: {
     marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#4caf50',
+    paddingVertical: 15,
+    backgroundColor: '#00e4d0',
     borderRadius: 10,
     alignItems: 'center',
   
@@ -177,7 +177,7 @@ const styles = {
     color: '#fff',
   },
   boxcontainer:{
-    width: 450,
+    width: 400,
     height: 870,
     justifyContent: 'center',
     paddingTop:20,

@@ -151,7 +151,7 @@ const ChatDetails = () => {
  
   return (
     <View style={{ flex: 1 }}>
-
+      <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={styles.header}>
     <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 1,left:7}}>
           <Icon name="arrow-back" size={24} color="white" />
@@ -185,7 +185,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     paddingVertical:40,
-    top:20,
   },
   headerImage: {
     width: 40,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView,StatusBar } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { db } from '../../config';
 import { FontAwesome ,MaterialIcons } from '@expo/vector-icons';
@@ -94,6 +94,7 @@ const AdminPays = () => {
 
   return (
     <ScrollView style={styles.cont}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <Text style={styles.Title}>Pays</Text>
       <View style={styles.pickerCont}>
         <Picker

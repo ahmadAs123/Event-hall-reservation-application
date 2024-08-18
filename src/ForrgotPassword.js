@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet,StatusBar } from 'react-native';
 import { auth } from '../config';
 import {sendPasswordResetEmail} from "firebase/auth";
 const ForgotPassword = () => {
@@ -23,6 +23,7 @@ const ForgotPassword = () => {
 
   return (
     <View style={styles.container}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
     <View style={styles.boxcontainer}>
     <Text style = {{fontWeight:'bold',fontSize :35 ,  textAlign: 'center' }}>Forggot password</Text>
       <TextInput

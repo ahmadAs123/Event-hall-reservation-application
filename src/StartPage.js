@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet ,StatusBar} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '../config';
 import { Icon } from 'react-native-elements'; 
@@ -11,6 +11,8 @@ const Start = () => {
 
   return (
     <View style={styles.container}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
+
     <View style={styles.boxcontainer}>
     <Text style = {{fontWeight:'bold',fontSize :33,marginTop:-10,  textAlign: 'center'}}>Welcome to Evento </Text>
       <Text style={styles.Text}>the best for you</Text>

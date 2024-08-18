@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet ,StatusBar} from 'react-native';
 import LoadingPage from '../../component/LoadingPage';
 import { doc, updateDoc } from "firebase/firestore";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -101,6 +101,7 @@ const AdminHalls = () => {
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <Text style={styles.label}>Halls Requests</Text>
       {requests.length === 0 ? (//if there is no requsets 
         <View style={styles.Cont}>

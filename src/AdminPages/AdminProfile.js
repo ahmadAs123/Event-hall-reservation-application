@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView,StatusBar } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -132,6 +132,7 @@ const AdminProfile = () => {
   };
   return (
     <View style={styles.container}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={styles.cont}>
         <TouchableOpacity onPress={chooseImg}>
           <View style={styles.ImgCon}>

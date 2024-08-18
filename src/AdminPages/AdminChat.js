@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, TextInput, RefreshControl, Alert,ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, TextInput, RefreshControl, Alert,ActivityIndicator,StatusBar  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query, orderBy, where, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../config';
@@ -21,57 +21,62 @@ const AdminChat = () => {
   };
 
   const fetchHallsWithLastMessage = async (isRefreshing = false) => {
+  if (!isRefreshing) {
+    setLoading(true);
+  }
+  try {
+    const usersArray = [];
+    const hallsRef = collection(db, 'HallsMessages');
+    const hallsSnapshot = await getDocs(hallsRef);
+
+    for (const doc of hallsSnapshot.docs) {
+      const messagesRef = collection(db, `HallsMessages/${doc.id}/messages`);
+      const messagesQuery = query(messagesRef, orderBy('createdAt', 'desc'));
+      const messagesSnapshot = await getDocs(messagesQuery);
+
+      let imageURL = '';
+      let lastUser = ''; // the user who chatted with the admin
+
+      if (!messagesSnapshot.empty) {   
+        for (const messageDoc of messagesSnapshot.docs) {
+          const messageData = messageDoc.data();
+          const user = messageData.user;
+          // Check if the user's _id matches the current user's uid
+          if (user.OwnerID && user.OwnerID === currentUser.uid ) {
+            console.log("User ID is: " + user._id);
+            const OwnerId = user.OwnerID;
+            const userQuery = query(collection(db, 'users'), where('userId', '==', OwnerId));
+            const userQuerySnapshot = await getDocs(userQuery);
+
+            if (!userQuerySnapshot.empty) {
+              const userData = userQuerySnapshot.docs[0].data();
+              imageURL = userData.imageURL || ''; // Get the user's image URL
+              lastUser = userData.firstName + " " + userData.lastName; // Get the user's full name
+            }
+            // Add to array if relevant data is found
+            usersArray.push({
+              _id: doc.id,
+              name: doc.id,
+              lastUser: lastUser,
+              imageURL: imageURL,
+            });
+            break; // Break after finding relevant user
+          }
+        }
+      }
+    }
+
+    setHalls(usersArray);
+    setFilteredHalls(usersArray);
+  } catch (error) {
+    console.log('Error while fetching halls chatting:', error);
+  } finally {
     if (!isRefreshing) {
-      setLoading(true);
+      setLoading(false);
     }
-    try {
-      const usersArray = [];
-      const hallsRef = collection(db, 'HallsMessages');
-      const hallsSnapshot = await getDocs(hallsRef);
-
-        // Loop  on docs 
-        for (const doc of hallsSnapshot.docs) {
-        const messagesRef = collection(db, `HallsMessages/${doc.id}/messages`);
-        const q = query(messagesRef, orderBy('createdAt', 'desc'));
-        const messagesSnapshot = await getDocs(q);
-
-        let imageURL = '';
-        let lastNuser = ''; // the  user that chat with  admin
-
-        if (!messagesSnapshot.empty) {
-          for (const messageDoc of messagesSnapshot.docs) {  // Find the  user who is not the current user and chat with admin
-            const messData = messageDoc.data();
-            if (messData.user?._id !== currentUser.uid) {
-              console.log(messData.user?.name)
-              lastNuser = messData.user?.name;
-              const userQuery = query(collection(db, 'users'), where('userId', '==', messData.user?._id)); // Fetching image URL 
-              const userQuerySnapshot = await getDocs(userQuery);
-              if (!userQuerySnapshot.empty) {
-                const userData = userQuerySnapshot.docs[0].data();
-                imageURL = userData.imageURL || '';
-              }
-              break;
-            }}}
-
-        usersArray.push({
-          _id: doc.id,
-          name: doc.id,
-          imageURL: imageURL,
-          lastUser: lastNuser,
-        });
-      }
-      setHalls(usersArray);
-      setFilteredHalls(usersArray);
-    } catch (error) {
-      console.log('Error while fetching users chatting:', error);
-    }
-    finally {
-      if (!isRefreshing) {
-        setLoading(false);
-      }
-      setRefreshing(false);
-    }
-  };
+    setRefreshing(false);
+  }
+};
 
   useEffect(() => {
     fetchHallsWithLastMessage();
@@ -124,6 +129,7 @@ const AdminChat = () => {
 
   return ( //rendering the list of users using flat list
     <View style={styles.container}>
+            <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchBar}

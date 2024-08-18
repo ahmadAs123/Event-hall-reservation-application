@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, FlatList,ScrollView ,StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, FlatList,ScrollView ,StyleSheet, TouchableOpacity,StatusBar } from 'react-native';
 import { collection, getDocs, query, where ,doc ,getDoc } from "firebase/firestore";
 import { FontAwesome ,Foundation } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'
@@ -125,7 +125,7 @@ const ListHalls = ({ route }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Header */}
+      <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={styles.header}>
         <Text style={styles.headerText}>Search Results</Text>
         <Foundation name="results" size={24} color="black" style={styles.resultIcon} />
