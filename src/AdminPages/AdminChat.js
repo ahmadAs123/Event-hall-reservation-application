@@ -45,7 +45,7 @@ const AdminChat = () => {
           if (user.OwnerID && user.OwnerID === currentUser.uid ) {
             console.log("User ID is: " + user._id);
             const OwnerId = user.OwnerID;
-            const userQuery = query(collection(db, 'users'), where('userId', '==', OwnerId));
+            const userQuery = query(collection(db, 'users'), where('userId', '==', user._id));
             const userQuerySnapshot = await getDocs(userQuery);
 
             if (!userQuerySnapshot.empty) {

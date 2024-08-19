@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput,Linking ,StatusBar} from 'react-native';
+import { ScrollView, View, Text, Dimensions, TouchableOpacity, StyleSheet, Image ,TextInput,Linking ,StatusBar,RefreshControl} from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { db } from "../config";  
 import { Picker } from '@react-native-picker/picker'; 
@@ -44,6 +44,7 @@ const SelectedHall = () => {
   const [selImage, setSelImage] = useState('');
   const [coordinates, setCoordinates] = useState(null);
   const [usePoints, setUsePoints] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const route = useRoute();
   const HallName  = route.params;
@@ -51,6 +52,19 @@ const SelectedHall = () => {
   const navigation = useNavigation();  
 
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchData(); // Re-fetch the data
+      await fetchJobOffers(); // Re-fetch job offers
+    } catch (err) {
+      console.error('Error during refresh:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  
   const convertLocToCoord = async (hallLocation) => {
     try {
       const response = await axios.get('https://nominatim.openstreetmap.org/search', {
@@ -172,7 +186,7 @@ const SelectedHall = () => {
     }
   };
   
-  useEffect(() => {
+  
     const fetchData = async () => { //fetching the data from firebase database 
       try {
         const hallsData = [];
@@ -208,8 +222,11 @@ const SelectedHall = () => {
       }
     };
 
-    fetchData();
-  }, [HallName]);
+  
+    useEffect(() => {
+      fetchData();
+    }, [HallName]);
+  
 
 // console.log(hallsData[0].Id)
   const ImgContHeight = Height * 0.23;
@@ -264,7 +281,11 @@ const SelectedHall = () => {
   const Reservation = async (hall) => {
     console.log("Selected Date:", selectedDate);
     console.log("Selected Shift:", selectedShift.start, '-', selectedShift.end);
-    
+
+    if (!selectedShift) {
+      Alert.alert("Please Select Date and Shift", "You must select both a date and a shift to proceed with the reservation.");
+      return; 
+    }
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -491,7 +512,14 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
     <View style={{ flex: 1 }}>
             <StatusBar backgroundColor="#00e4d0" barStyle="light-content" />
       <View style={{ height: ImgContHeight }}>
-        <ScrollView horizontal pagingEnabled ref={scrollViewRef}>
+        <ScrollView horizontal pagingEnabled ref={scrollViewRef}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
+        >
           {hallsData.map((hall) => (  //for scrolling the fetched images
             hall.images.map((img, index) => (
             <TouchableOpacity key={index} onPress={() => ImageClick(img)}>
@@ -603,23 +631,32 @@ const Submit = async (hallName, rating) => { //submit the ratevalue to the datab
                 enabled={true} // make sure that the list to be abled to open
               >
                 <Picker.Item label="Select" value="" />
-                {availableShifts.map((shift, i) => {
-                  const shiftKey = `${selectedDate}-${shift.start} - ${shift.end}`;
-                  const status = shiftsStatus[shiftKey];
-                  const isDisabled = status === 'pending' || status === 'accepted';
-                  return (
-                    <Picker.Item
-                      key={i}
-                      style={{ color: isDisabled ? 'gray' : 'black' }}
-                      value={shift}
-                      label={shift.label}
-                      enabled={!isDisabled} //for not showing  the  pending and  accepted shifts 
-                    />
-                  );
-                })}
-              </Picker>
-                </View>
-              </View>
+      {availableShifts.some(shift => {
+        const shiftKey = `${selectedDate}-${shift.start} - ${shift.end}`;
+        const status = shiftsStatus[shiftKey];
+        return status !== 'pending' && status !== 'accepted';
+      }) ? (
+        availableShifts.map((shift, i) => {
+          const shiftKey = `${selectedDate}-${shift.start} - ${shift.end}`;
+          const status = shiftsStatus[shiftKey];
+          const isDisabled = status === 'pending' || status === 'accepted';
+          return (
+            <Picker.Item
+              key={i}
+              style={{ color: isDisabled ? 'gray' : 'black' }}
+              value={shift}
+              label={shift.label}
+              enabled={!isDisabled} // prevent selecting pending and accepted shifts
+            />
+          );
+        })
+      ) : (
+        <Picker.Item label="No shifts available" value="" enabled={false} />
+      )}
+    </Picker>
+  </View>
+</View>
+
               <View style={styles.row}>
                 <Text style={styles.lbl}>Capacity:</Text>
                 <View style={styles.ansCon}>

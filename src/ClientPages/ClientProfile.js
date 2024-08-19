@@ -20,7 +20,7 @@ const ClientProfile = () => {
   const [location, setLocation] = useState('');
   const [id, setId] = useState('');
   const [points, setPoints] = useState('');
-
+  const [isWorker, setIsWorker] = useState(false);
 
   
   
@@ -37,13 +37,16 @@ const ClientProfile = () => {
           if (!querySnapshot.empty) {
             const docSnap = querySnapshot.docs[0];
             const Data = docSnap.data();
+            if(Data.type=='Worker')
+              setIsWorker(true)
             setFName(Data.firstName);
             setLName(Data.lastName)
             setEmail(Data.email);
 +           setLocation(Data.address || 'No address yet');
             setPhone(Data.phone);
             setId(Data.userId)
-            setPoints(Data.points)
+            if(Data.type!='Worker')
+             setPoints(Data.points)
             if (Data.imageURL) {
               setImage(Data.imageURL); // Set image 
             }
@@ -149,13 +152,13 @@ const ClientProfile = () => {
           <Text style={styles.Txt}>{location}</Text>
         </View>
       </View>
-
-      <View style={styles.section}>
-        <Text style={styles.T_name}></Text>
-         <Text style={styles.points}>My Points</Text>
-         <Text style={styles.pointstxt}>{points}</Text>
-         <FontAwesome5 name="coins" size={25} color="gold" style={styles.coin} />
-      </View>
+      {!isWorker && (
+        <View style={styles.section}>
+          <Text style={styles.points}>My Points</Text>
+          <Text style={styles.pointstxt}>{points}</Text>
+          <FontAwesome5 name="coins" size={25} color="gold" style={styles.coin} />
+        </View>
+      )}
       <View style={styles.logout}>
       <TouchableOpacity onPress={Logout}>
         <MaterialIcons name="logout" size={30} color="#666" />
